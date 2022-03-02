@@ -63,13 +63,15 @@
             camera.attachControl(canvas, true);
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
 
+
+            // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
-            whiteMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#eb3b5a");
+            whiteMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#FFFFFF");
 
             const blackMaterial = new BABYLON.StandardMaterial("Black");
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
-
+            // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, row, col) {
                 const box = BABYLON.MeshBuilder.CreateBox("box_" + row + col, { height: 0.5, width: 0.5, depth: 0.05 });
                 box.material = material;
@@ -77,6 +79,7 @@
                 box.position.x = positionX;
             }
 
+            // Create the checkerboard
             function createBoard(size) {
                 var material;
                 var yVal = 0;
@@ -95,15 +98,16 @@
                 }
             }
 
-
+            // Log the tile we click in the playground
             scene.onPointerDown = function (evt, pickResult) {
                 // We try to pick an object
                 if (pickResult.hit) {
-                    console.log(pickResult.pickedMesh.name)
+                    console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
                 }
             };
 
             createBoard(8);
+
             return scene;
         }
         window.initFunction = async function () {
