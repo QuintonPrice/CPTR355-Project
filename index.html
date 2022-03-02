@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-    <title>CPTR355 Collisions</title>
+    <title>Checkers</title>
 
     <!-- Babylon.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
@@ -59,49 +59,43 @@
         const createScene = function () {
             const scene = new BABYLON.Scene(engine);
 
-            const camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 4, 15, BABYLON.Vector3.Zero());
+            const camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 4, Math.PI / 4, 4, BABYLON.Vector3.Zero(), scene);
             camera.attachControl(canvas, true);
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
 
-            var grid = {
-                'h': 8,
-                'w': 8
-            };
-
-            const tiledGround = new BABYLON.MeshBuilder.CreateTiledGround("Tiled Ground", { xmin: -3, zmin: -3, xmax: 3, zmax: 3, subdivisions: grid });
-
-            //Create the multi material
-            //Create differents materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
             whiteMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#eb3b5a");
 
             const blackMaterial = new BABYLON.StandardMaterial("Black");
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
-            // Create Multi Material
-            const multimat = new BABYLON.MultiMaterial("multi", scene);
-            multimat.subMaterials.push(whiteMaterial);
-            multimat.subMaterials.push(blackMaterial);
 
+            function createBox(positionX, positionY, material) {
+                const box = BABYLON.MeshBuilder.CreateBox("box", { height: 0.5, width: 0.5, depth: 0.05 });
+                box.material = material;
+                box.position.y = positionY;
+                box.position.x = positionX;
+            }
 
-            // Apply the multi material
-            // Define multimat as material of the tiled ground
-            tiledGround.material = multimat;
-
-            // Needed variables to set subMeshes
-            const verticesCount = tiledGround.getTotalVertices();
-            const tileIndicesLength = tiledGround.getIndices().length / (grid.w * grid.h);
-
-            // Set subMeshes of the tiled ground
-            tiledGround.subMeshes = [];
-            let base = 0;
-            for (let row = 0; row < grid.h; row++) {
-                for (let col = 0; col < grid.w; col++) {
-                    tiledGround.subMeshes.push(new BABYLON.SubMesh(row % 2 ^ col % 2, 0, verticesCount, base, tileIndicesLength, tiledGround));
-                    base += tileIndicesLength;
+            function createBoard(size) {
+                var material;
+                var yVal = 0;
+                for (let row = 0; row < size; row++) {
+                    var xVal = 0;
+                    for (let col = 0; col < size; col++) {
+                        if (row % 2 === col % 2) {
+                            material = whiteMaterial;
+                        } else {
+                            material = blackMaterial;
+                        }
+                        createBox(xVal, yVal, material);
+                        xVal += 0.5;
+                    }
+                    yVal += 0.5;
                 }
             }
 
+            createBoard(8)
             return scene;
         }
         window.initFunction = async function () {
