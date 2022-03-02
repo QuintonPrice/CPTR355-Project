@@ -70,8 +70,8 @@
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
 
-            function createBox(positionX, positionY, material) {
-                const box = BABYLON.MeshBuilder.CreateBox("box", { height: 0.5, width: 0.5, depth: 0.05 });
+            function createBox(positionX, positionY, material, row, col) {
+                const box = BABYLON.MeshBuilder.CreateBox("box_" + row + col, { height: 0.5, width: 0.5, depth: 0.05 });
                 box.material = material;
                 box.position.y = positionY;
                 box.position.x = positionX;
@@ -88,14 +88,22 @@
                         } else {
                             material = blackMaterial;
                         }
-                        createBox(xVal, yVal, material);
+                        createBox(xVal, yVal, material, row, col);
                         xVal += 0.5;
                     }
                     yVal += 0.5;
                 }
             }
 
-            createBoard(8)
+
+            scene.onPointerDown = function (evt, pickResult) {
+                // We try to pick an object
+                if (pickResult.hit) {
+                    console.log(pickResult.pickedMesh.name)
+                }
+            };
+
+            createBoard(8);
             return scene;
         }
         window.initFunction = async function () {
