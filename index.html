@@ -63,6 +63,21 @@
             camera.attachControl(canvas, true);
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
 
+            // GUI
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+            var text1 = new BABYLON.GUI.TextBlock();
+            text1.text = "None Selected";
+            text1.width = "150px";
+            text1.height = "40px";
+            text1.color = "white";
+            text1.fontSize = 24;
+            advancedTexture.addControl(text1); 
+            text1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            text1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+            // TODO: Make function to see if tile is empty. If not, return info about piece (maybe array?)
+            // function getTileStatus() {}
 
             // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
@@ -103,6 +118,7 @@
                 // We try to pick an object
                 if (pickResult.hit) {
                     console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
+                    text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name;
                 }
             };
 
