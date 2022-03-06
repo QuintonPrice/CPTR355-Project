@@ -68,7 +68,7 @@
 
             var text1 = new BABYLON.GUI.TextBlock();
             text1.text = "None Selected";
-            text1.width = "150px";
+            text1.width = "300px";
             text1.height = "40px";
             text1.color = "white";
             text1.fontSize = 24;
@@ -88,15 +88,14 @@
 
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, row, col) {
-                const box = BABYLON.MeshBuilder.CreateBox("box_" + row + col, { height: 0.5, width: 0.5, depth: 0.05 });
+                const box = BABYLON.MeshBuilder.CreateBox("row_" + row + " " + "col_" + col, { height: 1, width: 1, depth: 0.05 });
                 box.material = material;
                 box.position.y = positionY;
                 box.position.x = positionX;
             }
 
-            // Function to create checker meshes
             // function createChecker(color) {
-            //     var 
+            //     for 
             // }
 
             // Create the checkerboard
@@ -112,9 +111,21 @@
                             material = blackMaterial;
                         }
                         createBox(xVal, yVal, material, row, col);
-                        xVal += 0.5;
+                        xVal += 1;
                     }
-                    yVal += 0.5;
+                    yVal += 1;
+                }
+            }
+            
+            function populateBoard(size) {
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col <8; col++) {
+                        if (row % 2 === col % 2) {
+                            console.log("White: " + " row: " + row + " col: " + col );
+                        } else {
+                            console.log("Black: " + " row: " + row + " col: " + col );
+                        }
+                    }
                 }
             }
 
@@ -122,12 +133,13 @@
             scene.onPointerDown = function (evt, pickResult) {
                 // We try to pick an object
                 if (pickResult.hit) {
-                    console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
+                    // console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
                     text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name;
                 }
             };
 
             createBoard(8);
+            populateBoard();
 
             return scene;
         }
