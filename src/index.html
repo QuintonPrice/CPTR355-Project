@@ -146,10 +146,8 @@
                     var xVal = 0;
                     for (let col = 0; col < 8; col++) {
                         if (row % 2 === col % 2) {
-                            // console.log("White: " + " row: " + row + " col: " + col);
                             createChecker(xVal, yVal, playerOneMaterial, row, col);
                         } else {
-                            // console.log("Black: " + " row: " + row + " col: " + col);
                         }
                         xVal += 1;
                     }
@@ -162,10 +160,8 @@
                     xVal = 7;
                     for (let col = 8; col > 0; col--) {
                         if (row % 2 === col % 2) {
-                            // console.log("White: " + " row: " + row + " col: " + col);
                             createChecker(xVal, yVal, playerTwoMaterial, row, col);
                         } else {
-                            // console.log("Black: " + " row: " + row + " col: " + col);
                         }
                         xVal -= 1;
                     }
