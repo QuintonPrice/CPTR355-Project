@@ -86,11 +86,17 @@
             const blackMaterial = new BABYLON.StandardMaterial("Black");
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
-            const brownWoodMaterial = new BABYLON.StandardMaterial("BrownWood");
-            brownWoodMaterial.diffuseTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            brownWoodMaterial.specularTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            brownWoodMaterial.emissiveTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            brownWoodMaterial.ambientTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            const darkWoodMaterial = new BABYLON.StandardMaterial("BrownWood");
+            darkWoodMaterial.diffuseTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            darkWoodMaterial.specularTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            darkWoodMaterial.emissiveTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            darkWoodMaterial.ambientTexture = new BABYLON.Texture("img/DarkWood.jpg");
+
+            const lightWoodMaterial = new BABYLON.StandardMaterial("LightWood");
+            lightWoodMaterial.diffuseTexture = new BABYLON.Texture("img/LightWood.jpg");
+            lightWoodMaterial.specularTexture = new BABYLON.Texture("img/LightWood.jpg");
+            lightWoodMaterial.emissiveTexture = new BABYLON.Texture("img/LightWood.jpg");
+            lightWoodMaterial.ambientTexture = new BABYLON.Texture("img/LightWood.jpg");
 
 
             // Create an individual tile for the checkerboard
@@ -103,13 +109,13 @@
 
             // Creates the checker piceces
             function createChecker(positionX, positionY, material, row, col) {
-                var cylinder = BABYLON.MeshBuilder.CreateCylinder("checkerPiece", {diameter: 0.85, height: 0.35});
+                var cylinder = BABYLON.MeshBuilder.CreateCylinder("checkerPiece", { tessellation: 80, diameter: 0.85, height: 0.20 });
                 cylinder.material = material;
                 cylinder.position.y = positionY;
                 cylinder.position.x = positionX;
-                cylinder.rotation = new BABYLON.Vector3(0,0,0);
+                cylinder.rotation = new BABYLON.Vector3(0, 0, 0);
                 cylinder.rotation.x = 1.5708;
-                cylinder.position.z = 0;
+                cylinder.position.z = 0.10;
             }
 
             // Create the checkerboard
@@ -131,21 +137,53 @@
                 }
             }
 
-            function populateBoard(size) {
+            // Populates the board with checkers pieces
+            function populateBoard(playerOneMaterial, playerTwoMaterial) {
+
+                // Player 1 pieces
                 var yVal = 0;
                 for (let row = 0; row < 3; row++) {
                     var xVal = 0;
                     for (let col = 0; col < 8; col++) {
                         if (row % 2 === col % 2) {
-                            console.log("White: " + " row: " + row + " col: " + col);
-                            createChecker(xVal, yVal, brownWoodMaterial, row, col);
+                            // console.log("White: " + " row: " + row + " col: " + col);
+                            createChecker(xVal, yVal, playerOneMaterial, row, col);
                         } else {
-                            console.log("Black: " + " row: " + row + " col: " + col);
+                            // console.log("Black: " + " row: " + row + " col: " + col);
                         }
                         xVal += 1;
                     }
-                    yVal += 1
+                    yVal += 1;
                 }
+
+                // Player 2 pieces
+                yVal = 7;
+                for (let row = 8; row > 5; row--) {
+                    xVal = 7;
+                    for (let col = 8; col > 0; col--) {
+                        if (row % 2 === col % 2) {
+                            // console.log("White: " + " row: " + row + " col: " + col);
+                            createChecker(xVal, yVal, playerTwoMaterial, row, col);
+                        } else {
+                            // console.log("Black: " + " row: " + row + " col: " + col);
+                        }
+                        xVal -= 1;
+                    }
+                    yVal -= 1
+                }
+            }
+
+            function createParticles(checkerPiece) {
+                // Create a particle system
+                const checkerParticles = new BABYLON.ParticleSystem("particles", 2000);
+
+                //Texture of each particle
+                checkerParticles.particleTexture = new BABYLON.Texture("img/flare.png");
+
+                // Position where the particles are emiited from
+                checkerParticles.emitter = checkerPiece;
+
+                checkerParticles.start();
             }
 
             // Log the tile we click in the playground
@@ -154,11 +192,15 @@
                 if (pickResult.hit) {
                     // console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
                     text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name;
+                    if (pickResult.pickedMesh.material.name === "BrownWood" || pickResult.pickedMesh.material.name === "LightWood") {
+                        createParticles(pickResult.pickedMesh);
+                        console.log("Particles!")
+                    }
                 }
             };
 
             createBoard(8);
-            populateBoard();
+            populateBoard(darkWoodMaterial, lightWoodMaterial);
 
             return scene;
         }
