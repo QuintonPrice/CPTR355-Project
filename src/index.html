@@ -120,12 +120,11 @@
                 var pointerDragBehaviorY = new BABYLON.PointerDragBehavior({ dragAxis: new BABYLON.Vector3(0, 0, 1) });
 
                 // Use drag plane in world space
-                pointerDragBehaviorX.useObjectOrientationForDragging = false;
-                pointerDragBehaviorY.useObjectOrientationForDragging = true;
+                // pointerDragBehaviorX.useObjectOrientationForDragging = true;
+                // pointerDragBehaviorY.useObjectOrientationForDragging = true;
 
-                cylinder.addBehavior(pointerDragBehaviorX);
-                cylinder.addBehavior(pointerDragBehaviorY);
-
+                // cylinder.addBehavior(pointerDragBehaviorX);
+                // cylinder.addBehavior(pointerDragBehaviorY);
             }
 
             // Create the checkerboard
@@ -193,26 +192,7 @@
                 checkerParticles.start();
             }
 
-            // function resetBoard() {
-
-            //    // TODO: Add function that deletes all meshes 
-            //     createBoard(8);
-            //     populateBoard(darkWoodMaterial, lightWoodMaterial);
-            // }
-
-            // var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-
-            // var button1 = BABYLON.GUI.Button.CreateSimpleButton("but1", "Click Me");
-            // button1.width = "150px"
-            // button1.height = "40px";
-            // button1.color = "white";
-            // button1.cornerRadius = 20;
-            // button1.background = "green";
-            // button1.onPointerUpObservable.add(function () {
-            //     setupBoard();
-            // });
-            // advancedTexture.addControl(button1);
-
+            var lastSelection = null;
 
             // Log the tile we click in the playground
             scene.onPointerDown = function (evt, pickResult) {
@@ -220,16 +200,34 @@
                 if (pickResult.hit) {
                     // console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
                     text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name + " position xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
-                    if (pickResult.pickedMesh.material.name === "BrownWood" || pickResult.pickedMesh.material.name === "LightWood") {
-                        // createParticles(pickResult.pickedMesh);
-                        // console.log("Particles!");
+
+                    if (lastSelection) {
+                        console.log(lastSelection.name, " tries to move to ", pickResult.pickedMesh.name);
+                        if (lastSelection.material.name === "LightWood" || lastSelection.material.name === "BrownWood") {
+                            lastSelection.position.x = pickResult.pickedMesh.position.x;
+                            lastSelection.position.y = pickResult.pickedMesh.position.y;
+                            console.log("Move successful!")
+                        } else {
+                            console.log("Not able to move that piece")
+                        }
+
+                        // Clear Selection
+                        lastSelection = null;
                     }
+                    else {
+                        lastSelection = pickResult.pickedMesh;
+                        console.log(lastSelection);
+
+                    }
+                }
+                else {
+                    lastSelection = null;
+                    console.log(lastSelection);
                 }
             };
 
             createBoard(8);
             populateBoard(darkWoodMaterial, lightWoodMaterial);
-
 
             return scene;
         }
