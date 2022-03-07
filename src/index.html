@@ -185,11 +185,7 @@
 
             // This determines if a move is valid
             function isValidMove(piece, tile) {
-                if (piece.material.name === "LightWood" || piece.material.name === "BrownWood") {
-                    return true;
-                } else {
-                    return false;
-                }
+                return (piece.material.name === "LightWood" || piece.material.name === "BrownWood" && tile.material.name === "White");
             }
 
             // Moves piece from point a to b. 
@@ -198,7 +194,7 @@
                 // piece.position.x = tile.position.x;
                 // piece.position.y = tile.position.y;
 
-                const moveAnimation = new BABYLON.Animation("moveAnimation", "position", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                const moveAnimation = new BABYLON.Animation("moveAnimation", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
                 var keys = [];
                 keys.push({
@@ -224,20 +220,19 @@
                 moveAnimation.setKeys(keys);
                 piece.animations.push(moveAnimation);
                 scene.beginAnimation(piece, 0, 25, false);
-
             }
+
             var lastSelection = null;
 
             // Function to handle clicking meshes
             scene.onPointerDown = function (evt, pickResult) {
-                // We try to pick an object
+                console.log(lastSelection);
                 if (pickResult.hit) {
-                    // console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
                     text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name + " position xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
 
                     if (lastSelection) {
                         console.log(lastSelection.name, " tries to move to ", pickResult.pickedMesh.name);
-                        if (lastSelection.material.name === "LightWood" || lastSelection.material.name === "BrownWood" && pickResult.pickedMesh) {
+                        if (isValidMove(lastSelection, pickResult.pickedMesh)) {
                             movePiece(lastSelection, pickResult.pickedMesh);
                             console.log("Move successful!");
                         } else {
