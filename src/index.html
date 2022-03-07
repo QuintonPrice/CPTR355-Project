@@ -67,9 +67,10 @@
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
             var text1 = new BABYLON.GUI.TextBlock();
+            text1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
             text1.text = "None Selected";
             text1.width = "300px";
-            text1.height = "40px";
+            text1.height = "60px";
             text1.color = "white";
             text1.fontSize = 24;
             advancedTexture.addControl(text1);
@@ -98,7 +99,6 @@
             lightWoodMaterial.emissiveTexture = new BABYLON.Texture("img/LightWood.jpg");
             lightWoodMaterial.ambientTexture = new BABYLON.Texture("img/LightWood.jpg");
 
-
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, row, col) {
                 const box = BABYLON.MeshBuilder.CreateBox("row_" + row + " " + "col_" + col, { height: 1, width: 1, depth: 0.05 });
@@ -108,8 +108,8 @@
             }
 
             // Creates the checker piceces
-            function createChecker(positionX, positionY, material, row, col) {
-                var cylinder = BABYLON.MeshBuilder.CreateCylinder("checkerPiece", { tessellation: 80, diameter: 0.85, height: 0.20 });
+            function createChecker(positionX, positionY, material, row, col, id) {
+                var cylinder = BABYLON.MeshBuilder.CreateCylinder(id, { tessellation: 80, diameter: 0.85, height: 0.20 });
                 cylinder.material = material;
                 cylinder.position.y = positionY;
                 cylinder.position.x = positionX;
@@ -140,14 +140,18 @@
             // Populates the board with checkers pieces
             function populateBoard(playerOneMaterial, playerTwoMaterial) {
 
+                var playerOneID = 0;
+                var playerTwoID = 0;
+
                 // Player 1 pieces
                 var yVal = 0;
                 for (let row = 0; row < 3; row++) {
                     var xVal = 0;
                     for (let col = 0; col < 8; col++) {
                         if (row % 2 === col % 2) {
-                            createChecker(xVal, yVal, playerOneMaterial, row, col);
-                        } else {
+                            // player 1 piece, denoted by 1_ and then the checker piece ID
+                            createChecker(xVal, yVal, playerOneMaterial, row, col, "1_" + playerOneID);
+                            playerOneID++;
                         }
                         xVal += 1;
                     }
@@ -160,25 +164,22 @@
                     xVal = 7;
                     for (let col = 8; col > 0; col--) {
                         if (row % 2 === col % 2) {
-                            createChecker(xVal, yVal, playerTwoMaterial, row, col);
-                        } else {
+                            // player 1 piece, denoted by 1_ and then the checker piece ID
+                            createChecker(xVal, yVal, playerTwoMaterial, row, col, "2_" + playerTwoID);
+                            playerTwoID++;
                         }
                         xVal -= 1;
                     }
-                    yVal -= 1
+                    yVal -= 1;
                 }
             }
 
+            // Creates the particles that are used for checker pieces
             function createParticles(checkerPiece) {
-                // Create a particle system
                 const checkerParticles = new BABYLON.ParticleSystem("particles", 2000);
-
-                //Texture of each particle
                 checkerParticles.particleTexture = new BABYLON.Texture("img/flare.png");
 
-                // Position where the particles are emiited from
                 checkerParticles.emitter = checkerPiece;
-
                 checkerParticles.start();
             }
 
@@ -187,10 +188,10 @@
                 // We try to pick an object
                 if (pickResult.hit) {
                     // console.log(pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name);
-                    text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name;
+                    text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name + " position xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
                     if (pickResult.pickedMesh.material.name === "BrownWood" || pickResult.pickedMesh.material.name === "LightWood") {
-                        createParticles(pickResult.pickedMesh);
-                        console.log("Particles!")
+                        // createParticles(pickResult.pickedMesh);
+                        // console.log("Particles!");
                     }
                 }
             };
@@ -201,7 +202,6 @@
             return scene;
         }
         window.initFunction = async function () {
-
 
             var asyncEngineCreation = async function () {
                 try {
