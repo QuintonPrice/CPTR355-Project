@@ -183,18 +183,52 @@
                 }
             }
 
-            // Creates the particles that are used for checker pieces
-            function createParticles(checkerPiece) {
-                const checkerParticles = new BABYLON.ParticleSystem("particles", 2000);
-                checkerParticles.particleTexture = new BABYLON.Texture("img/flare.png");
-
-                checkerParticles.emitter = checkerPiece;
-                checkerParticles.start();
+            // This determines if a move is valid
+            function isValidMove(piece, tile) {
+                if (piece.material.name === "LightWood" || piece.material.name === "BrownWood") {
+                    return true;
+                } else {
+                    return false;
+                }
             }
 
+            // Moves piece from point a to b. 
+            // TODO: Add animation
+            function movePiece(piece, tile) {
+                // piece.position.x = tile.position.x;
+                // piece.position.y = tile.position.y;
+
+                const moveAnimation = new BABYLON.Animation("moveAnimation", "position", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+                var keys = [];
+                keys.push({
+                    frame: 0,
+                    value: new BABYLON.Vector3(piece.position.x, piece.position.y, piece.position.z)
+                });
+
+                keys.push({
+                    frame: 5,
+                    value: new BABYLON.Vector3(piece.position.x, piece.position.y, 0.50)
+                });
+                
+                keys.push({
+                    frame: 20,
+                    value: new BABYLON.Vector3(tile.position.x, tile.position.y, 0.50)
+                });
+
+                keys.push({
+                    frame: 25,
+                    value: new BABYLON.Vector3(tile.position.x, tile.position.y, 0.10)
+                });
+
+                moveAnimation.setKeys(keys);
+                piece.animations.push(moveAnimation);
+                scene.beginAnimation(piece, 0, 25, false);
+
+            }
             var lastSelection = null;
 
-            // Log the tile we click in the playground
+            // Function to handle clicking meshes
             scene.onPointerDown = function (evt, pickResult) {
                 // We try to pick an object
                 if (pickResult.hit) {
@@ -203,10 +237,9 @@
 
                     if (lastSelection) {
                         console.log(lastSelection.name, " tries to move to ", pickResult.pickedMesh.name);
-                        if (lastSelection.material.name === "LightWood" || lastSelection.material.name === "BrownWood") {
-                            lastSelection.position.x = pickResult.pickedMesh.position.x;
-                            lastSelection.position.y = pickResult.pickedMesh.position.y;
-                            console.log("Move successful!")
+                        if (lastSelection.material.name === "LightWood" || lastSelection.material.name === "BrownWood" && pickResult.pickedMesh) {
+                            movePiece(lastSelection, pickResult.pickedMesh);
+                            console.log("Move successful!");
                         } else {
                             console.log("Not able to move that piece")
                         }
@@ -217,7 +250,6 @@
                     else {
                         lastSelection = pickResult.pickedMesh;
                         console.log(lastSelection);
-
                     }
                 }
                 else {
