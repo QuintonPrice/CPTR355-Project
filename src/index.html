@@ -77,9 +77,6 @@
             text1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             text1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
-            // TODO: Make function to see if tile is empty. If not, return info about piece (maybe array?)
-            // function getTileStatus() {}
-
             // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
             whiteMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#FFFFFF");
@@ -99,6 +96,12 @@
             lightWoodMaterial.emissiveTexture = new BABYLON.Texture("img/LightWood.jpg");
             lightWoodMaterial.ambientTexture = new BABYLON.Texture("img/LightWood.jpg");
 
+
+            // Highlight variables for picking pieces
+            var highlight = new BABYLON.HighlightLayer("highlight", scene);
+            highlight.blurHorizontalSize = 0.3 + Math.cos(0) * 0.6 + 0.6;
+            highlight.blurVerticalSize = 0.3 + Math.sin(0 / 3) * 0.6 + 0.6;
+
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, row, col) {
                 const box = BABYLON.MeshBuilder.CreateBox("row_" + row + " " + "col_" + col, { height: 1, width: 1, depth: 0.05 });
@@ -109,7 +112,7 @@
 
             // Creates the checker piceces
             function createChecker(positionX, positionY, material, row, col, id) {
-                var cylinder = BABYLON.MeshBuilder.CreateCylinder(id, { tessellation: 80, diameter: 0.85, height: 0.20 });
+                var cylinder = BABYLON.MeshBuilder.CreateCylinder(id, { tessellation: 8, diameter: 0.85, height: 0.20 });
                 cylinder.material = material;
                 cylinder.position.y = positionY;
                 cylinder.position.x = positionX;
@@ -183,20 +186,23 @@
                 }
             }
 
+            function isChecker(piece) {
+                return (piece.material.name === "BrownWood" || piece.material.name === "LightWood");
+            }
+
             // This determines if a move is valid
             function isValidMove(piece, tile) {
                 return (piece.material.name === "LightWood" || piece.material.name === "BrownWood" && tile.material.name === "White");
             }
 
             // Moves piece from point a to b. 
-            // TODO: Add animation
             function movePiece(piece, tile) {
                 // piece.position.x = tile.position.x;
                 // piece.position.y = tile.position.y;
 
                 const moveAnimation = new BABYLON.Animation("moveAnimation", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
-                var keys = [];
+                var keys = []
                 keys.push({
                     frame: 0,
                     value: new BABYLON.Vector3(piece.position.x, piece.position.y, piece.position.z)
@@ -206,7 +212,7 @@
                     frame: 5,
                     value: new BABYLON.Vector3(piece.position.x, piece.position.y, 0.50)
                 });
-                
+
                 keys.push({
                     frame: 20,
                     value: new BABYLON.Vector3(tile.position.x, tile.position.y, 0.50)
@@ -219,32 +225,42 @@
 
                 moveAnimation.setKeys(keys);
                 piece.animations.push(moveAnimation);
-                scene.beginAnimation(piece, 0, 25, false);
+                var checkerMoveAnimation = scene.beginAnimation(piece, 0, 25, false);
+
+                checkerMoveAnimation.onAnimationEnd = function () {
+                    highlight.removeMesh(piece);
+                }
             }
 
+            // Used to "store" the piece that is selected
             var lastSelection = null;
 
             // Function to handle clicking meshes
             scene.onPointerDown = function (evt, pickResult) {
-                console.log(lastSelection);
+
                 if (pickResult.hit) {
-                    text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name + " position xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
+                    text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name + " xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
 
                     if (lastSelection) {
                         console.log(lastSelection.name, " tries to move to ", pickResult.pickedMesh.name);
+
                         if (isValidMove(lastSelection, pickResult.pickedMesh)) {
                             movePiece(lastSelection, pickResult.pickedMesh);
-                            console.log("Move successful!");
+                            console.log("Moved " + lastSelection.name + " to " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y);
                         } else {
-                            console.log("Not able to move that piece")
+                            console.log("Not able to move that piece!");
                         }
 
                         // Clear Selection
                         lastSelection = null;
+
                     }
                     else {
                         lastSelection = pickResult.pickedMesh;
                         console.log(lastSelection);
+                        if (isChecker(lastSelection)) {
+                            highlight.addMesh(lastSelection, BABYLON.Color3.White());
+                        }
                     }
                 }
                 else {
