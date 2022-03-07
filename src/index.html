@@ -193,6 +193,27 @@
                 checkerParticles.start();
             }
 
+            // function resetBoard() {
+
+            //    // TODO: Add function that deletes all meshes 
+            //     createBoard(8);
+            //     populateBoard(darkWoodMaterial, lightWoodMaterial);
+            // }
+
+            // var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+            // var button1 = BABYLON.GUI.Button.CreateSimpleButton("but1", "Click Me");
+            // button1.width = "150px"
+            // button1.height = "40px";
+            // button1.color = "white";
+            // button1.cornerRadius = 20;
+            // button1.background = "green";
+            // button1.onPointerUpObservable.add(function () {
+            //     setupBoard();
+            // });
+            // advancedTexture.addControl(button1);
+
+
             // Log the tile we click in the playground
             scene.onPointerDown = function (evt, pickResult) {
                 // We try to pick an object
@@ -208,6 +229,7 @@
 
             createBoard(8);
             populateBoard(darkWoodMaterial, lightWoodMaterial);
+
 
             return scene;
         }
