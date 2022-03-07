@@ -72,7 +72,7 @@
             text1.height = "40px";
             text1.color = "white";
             text1.fontSize = 24;
-            advancedTexture.addControl(text1); 
+            advancedTexture.addControl(text1);
             text1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             text1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
@@ -86,6 +86,13 @@
             const blackMaterial = new BABYLON.StandardMaterial("Black");
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
+            const brownWoodMaterial = new BABYLON.StandardMaterial("BrownWood");
+            brownWoodMaterial.diffuseTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            brownWoodMaterial.specularTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            brownWoodMaterial.emissiveTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            brownWoodMaterial.ambientTexture = new BABYLON.Texture("img/DarkWood.jpg");
+
+
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, row, col) {
                 const box = BABYLON.MeshBuilder.CreateBox("row_" + row + " " + "col_" + col, { height: 1, width: 1, depth: 0.05 });
@@ -94,9 +101,16 @@
                 box.position.x = positionX;
             }
 
-            // function createChecker(color) {
-            //     for 
-            // }
+            // Creates the checker piceces
+            function createChecker(positionX, positionY, material, row, col) {
+                var cylinder = BABYLON.MeshBuilder.CreateCylinder("checkerPiece", {diameter: 0.85, height: 0.35});
+                cylinder.material = material;
+                cylinder.position.y = positionY;
+                cylinder.position.x = positionX;
+                cylinder.rotation = new BABYLON.Vector3(0,0,0);
+                cylinder.rotation.x = 1.5708;
+                cylinder.position.z = 0;
+            }
 
             // Create the checkerboard
             function createBoard(size) {
@@ -116,16 +130,21 @@
                     yVal += 1;
                 }
             }
-            
+
             function populateBoard(size) {
+                var yVal = 0;
                 for (let row = 0; row < 3; row++) {
-                    for (let col = 0; col <8; col++) {
+                    var xVal = 0;
+                    for (let col = 0; col < 8; col++) {
                         if (row % 2 === col % 2) {
-                            console.log("White: " + " row: " + row + " col: " + col );
+                            console.log("White: " + " row: " + row + " col: " + col);
+                            createChecker(xVal, yVal, brownWoodMaterial, row, col);
                         } else {
-                            console.log("Black: " + " row: " + row + " col: " + col );
+                            console.log("Black: " + " row: " + row + " col: " + col);
                         }
+                        xVal += 1;
                     }
+                    yVal += 1
                 }
             }
 
