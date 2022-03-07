@@ -70,7 +70,7 @@
             text1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
             text1.text = "None Selected";
             text1.width = "300px";
-            text1.height = "60px";
+            text1.height = "100px";
             text1.color = "white";
             text1.fontSize = 24;
             advancedTexture.addControl(text1);
@@ -116,6 +116,16 @@
                 cylinder.rotation = new BABYLON.Vector3(0, 0, 0);
                 cylinder.rotation.x = 1.5708;
                 cylinder.position.z = 0.10;
+                var pointerDragBehaviorX = new BABYLON.PointerDragBehavior({ dragAxis: new BABYLON.Vector3(1, 0, 0) });
+                var pointerDragBehaviorY = new BABYLON.PointerDragBehavior({ dragAxis: new BABYLON.Vector3(0, 0, 1) });
+
+                // Use drag plane in world space
+                pointerDragBehaviorX.useObjectOrientationForDragging = false;
+                pointerDragBehaviorY.useObjectOrientationForDragging = true;
+
+                cylinder.addBehavior(pointerDragBehaviorX);
+                cylinder.addBehavior(pointerDragBehaviorY);
+
             }
 
             // Create the checkerboard
