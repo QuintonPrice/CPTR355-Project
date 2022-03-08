@@ -62,8 +62,8 @@
             // Parameters: name, alpha, beta, radius, target position, scene
             var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
 
-            // Positions the camera overwriting alpha, beta, radius
-            camera.setPosition(new BABYLON.Vector3(4, 4, 20));
+            // Positions the camera
+            camera.setPosition(new BABYLON.Vector3(4, 4, 15));
 
             // This attaches the camera to the canvas
             camera.attachControl(canvas, true);
@@ -75,18 +75,29 @@
             const light = new BABYLON.PointLight("light", new BABYLON.Vector3(-2, 7, 2), scene);
             light.intensity = 1.5;
 
+            light.setEnabled(false);
+
             var lightOn = true;
+
+            var pipeline = new BABYLON.DefaultRenderingPipeline(
+                "defaultPipeline", // The name of the pipeline
+                false, // Do you want the pipeline to use HDR texture?
+                scene, // The scene instance
+                [camera] // The list of cameras to be attached to
+            );
+
+            pipeline.samples = 4;
 
             // Setup shadows
             var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
             shadowGenerator.useExponentialShadowMap = true;
             shadowGenerator.useKernelBlur = true;
-            shadowGenerator.blurKernel = 8;
+            shadowGenerator.blurKernel = 4;
 
             // GUI
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-
+            // Light toggle button
             var toggleLightButton = BABYLON.GUI.Button.CreateSimpleButton("toggleLight", "Toggle Lamp");
             toggleLightButton.width = "150px"
             toggleLightButton.height = "40px";
@@ -95,17 +106,18 @@
             toggleLightButton.background = "grey";
             toggleLightButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             toggleLightButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-            toggleLightButton.onPointerUpObservable.add(function () {
-                if (lightOn) {
-                    light.setEnabled(false);
-                    lightOn = !lightOn;
-                } else {
-                    light.setEnabled(true);
-                    lightOn = !lightOn;
-                }
-            });
+            // toggleLightButton.onPointerUpObservable.add(function () {
+            //     if (lightOn) {
+            //         light.setEnabled(true);
+            //         lightOn = !lightOn;
+            //     } else {
+            //         light.setEnabled(false);
+            //         lightOn = !lightOn;
+            //     }
+            // });
             advancedTexture.addControl(toggleLightButton);
 
+            // Status indicator
             var text1 = new BABYLON.GUI.TextBlock();
             text1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
             text1.text = "None Selected";
@@ -160,8 +172,12 @@
                 var checker = BABYLON.Mesh.MergeMeshes([cylinder, torus]);
 
                 checker.material = material;
-                checker.position.y = positionY;
                 checker.position.x = positionX;
+                checker.position.y = positionY;
+
+                // "p" for normal piece, "k" for king
+                checker.id = "p" + checker.position.x + checker.position.y; 
+                 
                 checker.rotation = new BABYLON.Vector3(0, 0, 0);
                 checker.rotation.x = 1.5708;
                 checker.position.z = 0.10;
@@ -225,14 +241,20 @@
                 }
             }
 
+            // Determines if clicked piece is a checker piece
             function isChecker(piece) {
                 return (piece.material.name === "pOneMaterial" || piece.material.name === "pTwoMaterial");
             }
 
             // This determines if a move is valid
-            function isValidMove(piece, tile) {
-                return ((piece.material.name === "pTwoMaterial" || piece.material.name === "pOneMaterial") && tile.material.name === "White");
+            function isValidMove(piece, tile, turn) {
+                
+                return (isChecker(piece) && tile.material.name === "White");
             }
+
+            // function isKing(piece) {
+            //     if (piece.)
+            // }
 
             // Moves piece from point a to b. 
             function movePiece(piece, tile) {
@@ -265,7 +287,9 @@
 
                 checkerMoveAnimation.onAnimationEnd = function () {
                     highlight.removeMesh(piece);
+                    piece.id = "p" + piece.position.x + "" + piece.position.y;   
                 }
+
             }
 
             // Used to "store" the piece that is selected
@@ -275,16 +299,13 @@
             scene.onPointerDown = function (evt, pickResult) {
 
                 if (pickResult.hit) {
-                    text1.text = pickResult.pickedMesh.name + " " + pickResult.pickedMesh.material.name + " xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
+                    text1.text = pickResult.pickedMesh.name + " \n" + "xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
+                    console.log("Mesh ID: " + pickResult.pickedMesh.id);
 
                     if (lastSelection) {
                         console.log(lastSelection.name, " tries to move to ", pickResult.pickedMesh.name);
-
                         if (isValidMove(lastSelection, pickResult.pickedMesh)) {
                             movePiece(lastSelection, pickResult.pickedMesh);
-                            console.log("Moved " + lastSelection.name + " to " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y);
-                        } else {
-                            console.log("Not able to move that piece!");
                         }
 
                         // Clear Selection
@@ -294,7 +315,7 @@
                     }
                     else {
                         lastSelection = pickResult.pickedMesh;
-                        console.log(lastSelection);
+                        // console.log(lastSelection);
 
                         if (isChecker(lastSelection)) {
                             highlight.addMesh(lastSelection, BABYLON.Color3.Yellow());
@@ -303,7 +324,7 @@
                 }
                 else {
                     lastSelection = null;
-                    console.log(lastSelection);
+                    // console.log(lastSelection);
                 }
             };
 
