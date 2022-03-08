@@ -80,6 +80,8 @@
             // Setup shadows
             var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
             shadowGenerator.useExponentialShadowMap = true;
+            shadowGenerator.useKernelBlur = true;
+            shadowGenerator.blurKernel = 8;
 
             // GUI
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
