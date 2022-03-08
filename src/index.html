@@ -59,12 +59,50 @@
         const createScene = function () {
             const scene = new BABYLON.Scene(engine);
 
-            const camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 4, Math.PI / 4, 4, BABYLON.Vector3.Zero(), scene);
+            // Parameters: name, alpha, beta, radius, target position, scene
+            var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
+
+            // Positions the camera overwriting alpha, beta, radius
+            camera.setPosition(new BABYLON.Vector3(4, 4, 20));
+
+            // This attaches the camera to the canvas
             camera.attachControl(canvas, true);
-            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
+
+            // Setup lights
+            const hemiLight = new BABYLON.HemisphericLight("hemiLght", new BABYLON.Vector3(1, 1, 0));
+            hemiLight.intensity = 1;
+
+            const light = new BABYLON.PointLight("light", new BABYLON.Vector3(-2, 7, 2), scene);
+            light.intensity = 1.5;
+
+            var lightOn = true;
+
+            // Setup shadows
+            var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+            shadowGenerator.useExponentialShadowMap = true;
 
             // GUI
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+
+            var toggleLightButton = BABYLON.GUI.Button.CreateSimpleButton("toggleLight", "Toggle Lamp");
+            toggleLightButton.width = "150px"
+            toggleLightButton.height = "40px";
+            toggleLightButton.color = "white";
+            toggleLightButton.cornerRadius = 0;
+            toggleLightButton.background = "grey";
+            toggleLightButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            toggleLightButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            toggleLightButton.onPointerUpObservable.add(function () {
+                if (lightOn) {
+                    light.setEnabled(false);
+                    lightOn = !lightOn;
+                } else {
+                    light.setEnabled(true);
+                    lightOn = !lightOn;
+                }
+            });
+            advancedTexture.addControl(toggleLightButton);
 
             var text1 = new BABYLON.GUI.TextBlock();
             text1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
@@ -74,7 +112,7 @@
             text1.color = "white";
             text1.fontSize = 24;
             advancedTexture.addControl(text1);
-            text1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            text1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
             text1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
             // Materials
@@ -107,13 +145,14 @@
                 box.material = material;
                 box.position.y = positionY;
                 box.position.x = positionX;
+                box.receiveShadows = true;
             }
 
             // Creates the checker piceces
             function createChecker(positionX, positionY, material, row, col, id) {
                 var cylinder = BABYLON.MeshBuilder.CreateCylinder(id, { tessellation: 32, diameter: 0.85, height: 0.20 });
 
-                var torus = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.10, diameter: 0.75, tessellation: 32});
+                var torus = BABYLON.MeshBuilder.CreateTorus("torus", { thickness: 0.10, diameter: 0.75, tessellation: 32 });
                 torus.position.y = 0.1;
 
                 var checker = BABYLON.Mesh.MergeMeshes([cylinder, torus]);
@@ -124,6 +163,8 @@
                 checker.rotation = new BABYLON.Vector3(0, 0, 0);
                 checker.rotation.x = 1.5708;
                 checker.position.z = 0.10;
+
+                shadowGenerator.addShadowCaster(checker);
             }
 
             // Create the checkerboard
@@ -193,9 +234,6 @@
 
             // Moves piece from point a to b. 
             function movePiece(piece, tile) {
-                // piece.position.x = tile.position.x;
-                // piece.position.y = tile.position.y;
-
                 const moveAnimation = new BABYLON.Animation("moveAnimation", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
                 var keys = []
@@ -255,6 +293,7 @@
                     else {
                         lastSelection = pickResult.pickedMesh;
                         console.log(lastSelection);
+
                         if (isChecker(lastSelection)) {
                             highlight.addMesh(lastSelection, BABYLON.Color3.White());
                         }
