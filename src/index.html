@@ -84,18 +84,17 @@
             const blackMaterial = new BABYLON.StandardMaterial("Black");
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
-            const darkWoodMaterial = new BABYLON.StandardMaterial("BrownWood");
-            darkWoodMaterial.diffuseTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            darkWoodMaterial.specularTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            darkWoodMaterial.emissiveTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            darkWoodMaterial.ambientTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            const pOneMaterial = new BABYLON.StandardMaterial("pOneMaterial");
+            pOneMaterial.diffuseTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            pOneMaterial.specularTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            pOneMaterial.emissiveTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            pOneMaterial.ambientTexture = new BABYLON.Texture("img/DarkWood.jpg");
 
-            const lightWoodMaterial = new BABYLON.StandardMaterial("LightWood");
-            lightWoodMaterial.diffuseTexture = new BABYLON.Texture("img/LightWood.jpg");
-            lightWoodMaterial.specularTexture = new BABYLON.Texture("img/LightWood.jpg");
-            lightWoodMaterial.emissiveTexture = new BABYLON.Texture("img/LightWood.jpg");
-            lightWoodMaterial.ambientTexture = new BABYLON.Texture("img/LightWood.jpg");
-
+            const pTwoMaterial = new BABYLON.StandardMaterial("pTwoMaterial");
+            pTwoMaterial.diffuseTexture = new BABYLON.Texture("img/LightWood.jpg");
+            pTwoMaterial.specularTexture = new BABYLON.Texture("img/LightWood.jpg");
+            pTwoMaterial.emissiveTexture = new BABYLON.Texture("img/LightWood.jpg");
+            pTwoMaterial.ambientTexture = new BABYLON.Texture("img/LightWood.jpg");
 
             // Highlight variables for picking pieces
             var highlight = new BABYLON.HighlightLayer("highlight", scene);
@@ -103,8 +102,8 @@
             highlight.blurVerticalSize = 0.3 + Math.sin(0 / 3) * 0.6 + 0.6;
 
             // Create an individual tile for the checkerboard
-            function createBox(positionX, positionY, material, row, col) {
-                const box = BABYLON.MeshBuilder.CreateBox("row_" + row + " " + "col_" + col, { height: 1, width: 1, depth: 0.05 });
+            function createBox(positionX, positionY, material, row, col, height, width, depth) {
+                const box = BABYLON.MeshBuilder.CreateBox("row_" + row + " " + "col_" + col, { height: height, width: width, depth: depth });
                 box.material = material;
                 box.position.y = positionY;
                 box.position.x = positionX;
@@ -112,22 +111,19 @@
 
             // Creates the checker piceces
             function createChecker(positionX, positionY, material, row, col, id) {
-                var cylinder = BABYLON.MeshBuilder.CreateCylinder(id, { tessellation: 8, diameter: 0.85, height: 0.20 });
-                cylinder.material = material;
-                cylinder.position.y = positionY;
-                cylinder.position.x = positionX;
-                cylinder.rotation = new BABYLON.Vector3(0, 0, 0);
-                cylinder.rotation.x = 1.5708;
-                cylinder.position.z = 0.10;
-                var pointerDragBehaviorX = new BABYLON.PointerDragBehavior({ dragAxis: new BABYLON.Vector3(1, 0, 0) });
-                var pointerDragBehaviorY = new BABYLON.PointerDragBehavior({ dragAxis: new BABYLON.Vector3(0, 0, 1) });
+                var cylinder = BABYLON.MeshBuilder.CreateCylinder(id, { tessellation: 32, diameter: 0.85, height: 0.20 });
 
-                // Use drag plane in world space
-                // pointerDragBehaviorX.useObjectOrientationForDragging = true;
-                // pointerDragBehaviorY.useObjectOrientationForDragging = true;
+                var torus = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.10, diameter: 0.75, tessellation: 32});
+                torus.position.y = 0.1;
 
-                // cylinder.addBehavior(pointerDragBehaviorX);
-                // cylinder.addBehavior(pointerDragBehaviorY);
+                var checker = BABYLON.Mesh.MergeMeshes([cylinder, torus]);
+
+                checker.material = material;
+                checker.position.y = positionY;
+                checker.position.x = positionX;
+                checker.rotation = new BABYLON.Vector3(0, 0, 0);
+                checker.rotation.x = 1.5708;
+                checker.position.z = 0.10;
             }
 
             // Create the checkerboard
@@ -142,7 +138,7 @@
                         } else {
                             material = blackMaterial;
                         }
-                        createBox(xVal, yVal, material, row, col);
+                        createBox(xVal, yVal, material, row, col, 1, 1, 0.05);
                         xVal += 1;
                     }
                     yVal += 1;
@@ -187,12 +183,12 @@
             }
 
             function isChecker(piece) {
-                return (piece.material.name === "BrownWood" || piece.material.name === "LightWood");
+                return (piece.material.name === "pOneMaterial" || piece.material.name === "pTwoMaterial");
             }
 
             // This determines if a move is valid
             function isValidMove(piece, tile) {
-                return (piece.material.name === "LightWood" || piece.material.name === "BrownWood" && tile.material.name === "White");
+                return ((piece.material.name === "pTwoMaterial" || piece.material.name === "pOneMaterial") && tile.material.name === "White");
             }
 
             // Moves piece from point a to b. 
@@ -252,6 +248,7 @@
                         }
 
                         // Clear Selection
+                        highlight.removeMesh(lastSelection);
                         lastSelection = null;
 
                     }
@@ -270,7 +267,7 @@
             };
 
             createBoard(8);
-            populateBoard(darkWoodMaterial, lightWoodMaterial);
+            populateBoard(pOneMaterial, pTwoMaterial);
 
             return scene;
         }
