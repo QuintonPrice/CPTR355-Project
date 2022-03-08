@@ -75,8 +75,6 @@
             const light = new BABYLON.PointLight("light", new BABYLON.Vector3(-2, 7, 2), scene);
             light.intensity = 1.5;
 
-            light.setEnabled(false);
-
             var lightOn = true;
 
             var pipeline = new BABYLON.DefaultRenderingPipeline(
@@ -97,37 +95,66 @@
             // GUI
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
+            var guiWidthLeft = "150px";
+            var guiWidthRight = "300px";
+            
+            // Stack panel right
+            var rightPanel = new BABYLON.GUI.StackPanel();
+            rightPanel.width = guiWidthRight;
+            rightPanel.isVertical = true;
+            rightPanel.paddingRight = "20px";
+            rightPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            rightPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            advancedTexture.addControl(rightPanel);
+
+            // Stack panel left
+            var leftPanel = new BABYLON.GUI.StackPanel();
+            leftPanel.width = guiWidthLeft;
+            leftPanel.isVertical = true;
+            rightPanel.paddingRight = "20px";
+            leftPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            leftPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            advancedTexture.addControl(leftPanel);
+
             // Light toggle button
             var toggleLightButton = BABYLON.GUI.Button.CreateSimpleButton("toggleLight", "Toggle Lamp");
-            toggleLightButton.width = "150px"
+            toggleLightButton.width = guiWidthLeft;
             toggleLightButton.height = "40px";
             toggleLightButton.color = "white";
-            toggleLightButton.cornerRadius = 0;
             toggleLightButton.background = "grey";
             toggleLightButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             toggleLightButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-            // toggleLightButton.onPointerUpObservable.add(function () {
-            //     if (lightOn) {
-            //         light.setEnabled(true);
-            //         lightOn = !lightOn;
-            //     } else {
-            //         light.setEnabled(false);
-            //         lightOn = !lightOn;
-            //     }
-            // });
-            advancedTexture.addControl(toggleLightButton);
+            // Toggle the light switch
+            toggleLightButton.onPointerUpObservable.add(function () {
+                console.log("pushing button, : " + lightOn);
+                if (lightOn) {
+                    light.setEnabled(false);
+                    lightOn = !lightOn;
+                } else {
+                    light.setEnabled(true);
+                    lightOn = !lightOn;
+                }
+            });
+            leftPanel.addControl(toggleLightButton);
 
             // Status indicator
-            var text1 = new BABYLON.GUI.TextBlock();
-            text1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
-            text1.text = "None Selected";
-            text1.width = "300px";
-            text1.height = "100px";
-            text1.color = "white";
-            text1.fontSize = 24;
-            advancedTexture.addControl(text1);
-            text1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-            text1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            var infoText = new BABYLON.GUI.TextBlock();
+            infoText.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
+            infoText.text = "None Selected";
+            infoText.width = guiWidthRight;
+            infoText.height = "100px";
+            infoText.color = "white";
+            infoText.fontSize = 24;
+            rightPanel.addControl(infoText);
+
+            var turnText = new BABYLON.GUI.TextBlock();
+            turnText.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
+            turnText.text = "Turn: Player 1";
+            turnText.width = guiWidthRight;
+            turnText.height = "100px";
+            turnText.color = "white";
+            turnText.fontSize = 24;
+            rightPanel.addControl(turnText);
 
             // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
@@ -176,8 +203,8 @@
                 checker.position.y = positionY;
 
                 // "p" for normal piece, "k" for king
-                checker.id = "p" + checker.position.x + checker.position.y; 
-                 
+                checker.id = "p" + checker.position.x + checker.position.y;
+
                 checker.rotation = new BABYLON.Vector3(0, 0, 0);
                 checker.rotation.x = 1.5708;
                 checker.position.z = 0.10;
@@ -248,8 +275,11 @@
 
             // This determines if a move is valid
             function isValidMove(piece, tile, turn) {
-                
-                return (isChecker(piece) && tile.material.name === "White");
+                if (turn) {
+                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "1");
+                } else if (!turn) {
+                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "2");
+                }
             }
 
             // function isKing(piece) {
@@ -287,7 +317,12 @@
 
                 checkerMoveAnimation.onAnimationEnd = function () {
                     highlight.removeMesh(piece);
-                    piece.id = "p" + piece.position.x + "" + piece.position.y;   
+                    piece.id = "p" + piece.position.x + "" + piece.position.y;
+                    if (turn) {
+                        turnText.text = "Turn: Player 1"
+                    } else {
+                        turnText.text = "Turn: Player 2"
+                    }
                 }
 
             }
@@ -295,27 +330,29 @@
             // Used to "store" the piece that is selected
             var lastSelection = null;
 
+            // Bool to keep track of turn.
+            // true = p1, false = p2
+            var turn = true;
+
             // Function to handle clicking meshes
             scene.onPointerDown = function (evt, pickResult) {
 
                 if (pickResult.hit) {
-                    text1.text = pickResult.pickedMesh.name + " \n" + "xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
+                    infoText.text = pickResult.pickedMesh.name + " \n" + "xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
                     console.log("Mesh ID: " + pickResult.pickedMesh.id);
-
+                    console.log(turn);
                     if (lastSelection) {
-                        console.log(lastSelection.name, " tries to move to ", pickResult.pickedMesh.name);
-                        if (isValidMove(lastSelection, pickResult.pickedMesh)) {
-                            movePiece(lastSelection, pickResult.pickedMesh);
+                        if (isValidMove(lastSelection, pickResult.pickedMesh, turn)) {
+                            movePiece(lastSelection, pickResult.pickedMesh, turn);
+                            turn = !turn;
                         }
 
                         // Clear Selection
                         highlight.removeMesh(lastSelection);
                         lastSelection = null;
 
-                    }
-                    else {
+                    } else {
                         lastSelection = pickResult.pickedMesh;
-                        // console.log(lastSelection);
 
                         if (isChecker(lastSelection)) {
                             highlight.addMesh(lastSelection, BABYLON.Color3.Yellow());
