@@ -173,7 +173,7 @@
 
             var turnText = new BABYLON.GUI.TextBlock();
             turnText.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
-            turnText.text = "Turn: Player 1";
+            turnText.text = "Player 1's Turn";
             turnText.width = guiWidthRight;
             turnText.height = "100px";
             turnText.color = "white";
@@ -310,12 +310,20 @@
                 return (piece.material.name === "pOneMaterial" || piece.material.name === "pTwoMaterial");
             }
 
+            function isAvailableTile(piece, tile, turn) {
+                if (turn) {
+                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y + 1 === tile.position.y));
+                } else {
+                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y - 1 === tile.position.y));
+                }
+            } 
+
             // This determines if a move is valid
             function isValidMove(piece, tile, turn) {
                 if (turn) {
-                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "1" && tile.id === "e");
+                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "1" && tile.id === "e" && isAvailableTile(piece, tile, turn));
                 } else if (!turn) {
-                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "2" && tile.id === "e");
+                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "2" && tile.id === "e" && isAvailableTile(piece, tile, turn));
                 }
             }
 
@@ -367,9 +375,9 @@
                     highlight.removeMesh(piece);
                     piece.id = "p" + piece.position.x + "" + piece.position.y;
                     if (turn) {
-                        turnText.text = "Turn: Player 1"
+                        turnText.text = "Player 1's Turn"
                     } else {
-                        turnText.text = "Turn: Player 2"
+                        turnText.text = "Player 2's Turn"
                     }
                 }
             }
