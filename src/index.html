@@ -120,7 +120,7 @@
             toggleLightButton.width = guiWidthLeft;
             toggleLightButton.height = "40px";
             toggleLightButton.color = "white";
-            toggleLightButton.background = "grey";
+            toggleLightButton.background = "orange";
             toggleLightButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             toggleLightButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
             // Toggle the light switch
@@ -350,13 +350,13 @@
 
             // Bool to keep track of turn.
             // true = p1, false = p2
-            var turn = true;
+            var turn;
 
             // Function to handle clicking meshes
             scene.onPointerDown = function (evt, pickResult) {
 
                 if (pickResult.hit) {
-                    infoText.text = pickResult.pickedMesh.name + " \n" + "xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y + " \n" + pickResult.pickedMesh.id;
+                    infoText.text = pickResult.pickedMesh.name + " \n" + pickResult.pickedMesh.id;
                     console.log("Mesh ID: " + pickResult.pickedMesh.id);
 
                     if (lastSelection) {
@@ -382,22 +382,23 @@
                 }
             };
 
+            // Resets game and game state
             function resetGame() {
                 for (var i = 0; i < scene.meshes.length; i++) {
                     scene.meshes[i].dispose();
                     i--;
                 }
+                initalizeGame();
+            }
 
+            function initalizeGame() {
                 createBoard(8);
                 populateBoard(pOneMaterial, pTwoMaterial);
                 turn = true;
                 lastSelection = null;
-
             }
 
-
-            createBoard(8);
-            populateBoard(pOneMaterial, pTwoMaterial);
+            initalizeGame();
 
             return scene;
         }
