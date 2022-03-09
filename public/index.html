@@ -82,8 +82,7 @@
             jumpParticles.emitRate = 100;
             jumpParticles.manualEmitCount = 500;
 
-
-
+            
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
@@ -208,6 +207,13 @@
             pTwoMaterial.emissiveTexture = new BABYLON.Texture("img/RedTexture.jpg");
             pTwoMaterial.ambientTexture = new BABYLON.Texture("img/RedTexture.jpg");
 
+            const tableMaterial = new BABYLON.StandardMaterial("tableMaterial");
+            tableMaterial.diffuseTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            tableMaterial.specularTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            tableMaterial.emissiveTexture = new BABYLON.Texture("img/DarkWood.jpg");
+            tableMaterial.ambientTexture = new BABYLON.Texture("img/DarkWood.jpg");
+
+
             // Highlight variables for picking pieces
             var highlight = new BABYLON.HighlightLayer("highlight", scene);
             highlight.blurHorizontalSize = 0.3 + Math.cos(0) * 0.6 + 0.6;
@@ -248,9 +254,8 @@
                 // "p" for normal piece, "k" for king
                 checker.name = id + positionX + positionY;
                 checker.id = "p";
-                checker.rotation = new BABYLON.Vector3(0, 0, 0);
-                checker.rotation.x = 1.5708;
-                checker.position.z = 0.10;
+                checker.rotation = new BABYLON.Vector3(1.5708, 0, 0);
+                checker.position.z = 0.2;
 
                 // update tile to be full
                 var selectedTile = scene.getMeshByName("t" + positionX + positionY);
@@ -271,11 +276,17 @@
                         } else {
                             material = blackMaterial;
                         }
-                        createBox(xVal, yVal, material, 1, 1, 0.05);
+                        createBox(xVal, yVal, material, 1, 1, 0.25);
                         xVal += 1;
                     }
                     yVal += 1;
                 }
+                var table = BABYLON.MeshBuilder.CreateCylinder("table", { height: 0.25, diameter: 20, tessellation: 6}, scene);
+                table.rotation = new BABYLON.Vector3(1.5708, 0, 0);
+                table.position.x = 3.5;
+                table.position.y = 3.5;
+                table.position.z = -0.25;
+                table.material = tableMaterial;
             }
 
             // Populates the board with checkers pieces
@@ -433,17 +444,17 @@
 
                 keys.push({
                     frame: 5,
-                    value: new BABYLON.Vector3(piece.position.x, piece.position.y, 0.50)
+                    value: new BABYLON.Vector3(piece.position.x, piece.position.y, 0.75)
                 });
 
                 keys.push({
                     frame: 20,
-                    value: new BABYLON.Vector3(tile.position.x, tile.position.y, 0.50)
+                    value: new BABYLON.Vector3(tile.position.x, tile.position.y, 0.75)
                 });
 
                 keys.push({
                     frame: 25,
-                    value: new BABYLON.Vector3(tile.position.x, tile.position.y, 0.10)
+                    value: new BABYLON.Vector3(tile.position.x, tile.position.y, 0.2)
                 });
 
                 moveAnimation.setKeys(keys);
