@@ -86,12 +86,12 @@
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
-                false, // Do you want the pipeline to use HDR texture?
+                true, // Do you want the pipeline to use HDR texture?
                 scene, // The scene instance
                 [camera] // The list of cameras to be attached to
             );
 
-            pipeline.samples = 4;
+            pipeline.samples = 32;
 
             // Shadows
             var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
@@ -264,6 +264,16 @@
                 shadowGenerator.addShadowCaster(checker);
             }
 
+            function createTable() {
+                var table = BABYLON.MeshBuilder.CreateCylinder("table", { height: 0.25, diameter: 20, tessellation: 6}, scene);
+                table.rotation = new BABYLON.Vector3(1.5708, 0, 0);
+                table.position.x = 3.5;
+                table.position.y = 3.5;
+                table.position.z = -0.25;
+                table.material = tableMaterial;
+                table.receiveShadows = true;
+            }
+
             // Create the checkerboard
             function createBoard(size) {
                 var material;
@@ -281,14 +291,10 @@
                     }
                     yVal += 1;
                 }
-                var table = BABYLON.MeshBuilder.CreateCylinder("table", { height: 0.25, diameter: 20, tessellation: 6}, scene);
-                table.rotation = new BABYLON.Vector3(1.5708, 0, 0);
-                table.position.x = 3.5;
-                table.position.y = 3.5;
-                table.position.z = -0.25;
-                table.material = tableMaterial;
-            }
+                createTable();
 
+            }
+            
             // Populates the board with checkers pieces
             function populateBoard(playerOneMaterial, playerTwoMaterial) {
 
