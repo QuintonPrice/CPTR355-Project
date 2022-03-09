@@ -70,7 +70,7 @@
             const hemiLight = new BABYLON.HemisphericLight("hemiLght", new BABYLON.Vector3(1, 1, 0));
             hemiLight.intensity = 1;
 
-            const light = new BABYLON.PointLight("light", new BABYLON.Vector3(-2, 7, 2), scene);
+            const light = new BABYLON.PointLight("light", new BABYLON.Vector3(0, 9, 2), scene);
             light.intensity = 1.5;
 
             var lightOn = true;
@@ -82,7 +82,7 @@
             jumpParticles.emitRate = 100;
             jumpParticles.manualEmitCount = 500;
 
-            
+
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
@@ -264,8 +264,9 @@
                 shadowGenerator.addShadowCaster(checker);
             }
 
+            // Creates the table that the board sits on
             function createTable() {
-                var table = BABYLON.MeshBuilder.CreateCylinder("table", { height: 0.25, diameter: 20, tessellation: 6}, scene);
+                var table = BABYLON.MeshBuilder.CreateCylinder("table", { height: 0.25, diameter: 20, tessellation: 6 }, scene);
                 table.rotation = new BABYLON.Vector3(1.5708, 0, 0);
                 table.position.x = 3.5;
                 table.position.y = 3.5;
@@ -273,6 +274,25 @@
                 table.material = tableMaterial;
                 table.receiveShadows = true;
             }
+
+
+            // Creates border around checkerboard
+            function createBorder(positionX, positionY, material, height, width) {
+                const borderPiece = BABYLON.MeshBuilder.CreateBox("border", { height: height, width: width, depth: 0.75 });
+
+                borderPiece.material = material;
+                borderPiece.position.x = positionX;
+                borderPiece.position.y = positionY;
+                borderPiece.position.z = 0.1;
+                borderPiece.receiveShadows = true;
+                shadowGenerator.addShadowCaster(borderPiece);
+
+            }
+            
+            createBorder(3.5, -0.65, whiteMaterial, 0.3, 8.5);
+            createBorder(3.5, 7.65, whiteMaterial, 0.3, 8.5);
+            createBorder(-0.6, 3.5, whiteMaterial, 8.5, 0.3);
+            createBorder(7.6, 3.5, whiteMaterial, 8.5, 0.3);
 
             // Create the checkerboard
             function createBoard(size) {
@@ -287,14 +307,20 @@
                             material = blackMaterial;
                         }
                         createBox(xVal, yVal, material, 1, 1, 0.25);
+                        // if (yVal === 0) {
+                        //     createBorder(xVal, yVal - 0.65, whiteMaterial, 0.35, 1.125);
+                        // } if (yVal === 7) {
+                        //     createBorder(xVal, yVal + 0.65, whiteMaterial, 0.35, 1.125);
+                        // } if (xVal === 0) {
+                        //     createBorder(xVal - 0.65, yVal, whiteMaterial, 1.125, 0.35);
+                        // }
                         xVal += 1;
                     }
                     yVal += 1;
                 }
                 createTable();
-
             }
-            
+
             // Populates the board with checkers pieces
             function populateBoard(playerOneMaterial, playerTwoMaterial) {
 
@@ -468,7 +494,6 @@
                 var checkerMoveAnimation = scene.beginAnimation(piece, 0, 25, false);
 
                 checkerMoveAnimation.onAnimationEnd = function () {
-
                     if (!muteSound) {
                         moveSound.play();
                     }
