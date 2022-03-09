@@ -130,7 +130,7 @@
                 lightOn = !lightOn;
             });
             leftPanel.addControl(toggleLightButton);
-            
+
             // Mute button
             var muteSound = false;
             var muteButton = BABYLON.GUI.Button.CreateSimpleButton("mute", "Mute/Unmute Sound");
@@ -237,7 +237,8 @@
                 checker.position.y = positionY;
 
                 // "p" for normal piece, "k" for king
-                checker.id = "p" + checker.position.x + checker.position.y;
+                checker.name = id + positionX + positionY;
+                checker.id = "p";
                 checker.rotation = new BABYLON.Vector3(0, 0, 0);
                 checker.rotation.x = 1.5708;
                 checker.position.z = 0.10;
@@ -281,7 +282,7 @@
                     for (let col = 0; col < 8; col++) {
                         if (row % 2 === col % 2) {
                             // player 1 piece, denoted by 1_ and then the checker piece ID
-                            createChecker(xVal, yVal, playerOneMaterial, "1_" + playerOneID);
+                            createChecker(xVal, yVal, playerOneMaterial, "1_");
                             playerOneID++;
                         }
                         xVal += 1;
@@ -296,7 +297,7 @@
                     for (let col = 8; col > 0; col--) {
                         if (row % 2 === col % 2) {
                             // player 1 piece, denoted by 1_ and then the checker piece ID
-                            createChecker(xVal, yVal, playerTwoMaterial, "2_" + playerTwoID);
+                            createChecker(xVal, yVal, playerTwoMaterial, "2_");
                             playerTwoID++;
                         }
                         xVal -= 1;
@@ -311,20 +312,65 @@
             }
 
             // Checks to make sure tile is available
-            function isAvailableTile(piece, tile, turn) {
+            function isNeighboringTile(piece, tile, turn) {
                 if (turn) {
-                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y + 1 === tile.position.y) && tile.material.name && tile.id === "e");
+                    return (
+                        ((piece.position.x + 1 === tile.position.x) || (piece.position.x - 1 === tile.position.x))
+                        && (piece.position.y + 1 === tile.position.y)
+                        && tile.material.name && tile.id === "e");
+
                 } else {
-                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y - 1 === tile.position.y) && tile.material.name && tile.id === "e");
+                    return (
+                        ((piece.position.x + 1 === tile.position.x) || (piece.position.x - 1 === tile.position.x))
+                        && (piece.position.y - 1 === tile.position.y)
+                        && tile.material.name && tile.id === "e");
                 }
-            } 
+            }
+
+            function isJumpable(piece, tile, turn) {
+                var name;
+                var name2;
+                if (turn) {
+                    if (((piece.position.x + 2 === tile.position.x) || (piece.position.x - 2 === tile.position.x)) && piece.position.y + 2 === tile.position.y) {
+                        name = "2_" + (piece.position.x + 1) + (piece.position.y + 1);
+                        name2 = "2_" + (piece.position.x - 1) + (piece.position.y + 1);
+                        console.log((name));
+                        console.log((name2));
+                        if (scene.getMeshByName(name) != null) {
+                            scene.getMeshByName(name).dispose();
+                            return true;
+                        } else if (scene.getMeshByName(name2) != null) {
+                            scene.getMeshByName(name2).dispose();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                } else {
+                    if (((piece.position.x + 2 === tile.position.x) || (piece.position.x - 2 === tile.position.x)) && piece.position.y - 2 === tile.position.y) {
+                        name = "1_" + (piece.position.x + 1) + (piece.position.y - 1);
+                        name2 = "1_" + (piece.position.x - 1) + (piece.position.y - 1);
+                        console.log((name));
+                        console.log((name2));
+                        if (scene.getMeshByName(name) != null) {
+                            scene.getMeshByName(name).dispose();
+                            return true;
+                        } else if (scene.getMeshByName(name2) != null) {
+                            scene.getMeshByName(name2).dispose();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
 
             // This determines if a move is valid
             function isValidMove(piece, tile, turn) {
                 if (turn) {
-                    return (isChecker(piece) && piece.name[0] === "1" && isAvailableTile(piece, tile, turn));
+                    return (isChecker(piece) && piece.name[0] === "1" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
                 } else if (!turn) {
-                    return (isChecker(piece) && piece.name[0] === "2" && isAvailableTile(piece, tile, turn));
+                    return (isChecker(piece) && piece.name[0] === "2" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
                 }
             }
 
@@ -374,7 +420,7 @@
                     }
 
                     highlight.removeMesh(piece);
-                    piece.id = "p" + piece.position.x + "" + piece.position.y;
+                    piece.name = piece.name[0] + "_" + tile.position.x + tile.position.y;
                     if (turn) {
                         turnText.text = "Player 1's Turn"
                     } else {
