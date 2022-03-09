@@ -310,20 +310,21 @@
                 return (piece.material.name === "pOneMaterial" || piece.material.name === "pTwoMaterial");
             }
 
+            // Checks to make sure tile is available
             function isAvailableTile(piece, tile, turn) {
                 if (turn) {
-                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y + 1 === tile.position.y));
+                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y + 1 === tile.position.y) && tile.material.name && tile.id === "e");
                 } else {
-                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y - 1 === tile.position.y));
+                    return (((piece.position.x + 1 === tile.position.x) || (piece.position.x -1 === tile.position.x)) && (piece.position.y - 1 === tile.position.y) && tile.material.name && tile.id === "e");
                 }
             } 
 
             // This determines if a move is valid
             function isValidMove(piece, tile, turn) {
                 if (turn) {
-                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "1" && tile.id === "e" && isAvailableTile(piece, tile, turn));
+                    return (isChecker(piece) && piece.name[0] === "1" && isAvailableTile(piece, tile, turn));
                 } else if (!turn) {
-                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "2" && tile.id === "e" && isAvailableTile(piece, tile, turn));
+                    return (isChecker(piece) && piece.name[0] === "2" && isAvailableTile(piece, tile, turn));
                 }
             }
 
