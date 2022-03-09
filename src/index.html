@@ -76,6 +76,7 @@
             light.intensity = 1.5;
 
             var lightOn = true;
+            light.setEnabled(lightOn);
 
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
@@ -97,7 +98,7 @@
 
             var guiWidthLeft = "150px";
             var guiWidthRight = "300px";
-            
+
             // Stack panel right
             var rightPanel = new BABYLON.GUI.StackPanel();
             rightPanel.width = guiWidthRight;
@@ -127,13 +128,8 @@
             // Toggle the light switch
             toggleLightButton.onPointerUpObservable.add(function () {
                 console.log("pushing button, : " + lightOn);
-                if (lightOn) {
-                    light.setEnabled(false);
-                    lightOn = !lightOn;
-                } else {
-                    light.setEnabled(true);
-                    lightOn = !lightOn;
-                }
+                light.setEnabled(!lightOn);
+                lightOn = !lightOn;
             });
             leftPanel.addControl(toggleLightButton);
 
@@ -164,10 +160,10 @@
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
             const pOneMaterial = new BABYLON.StandardMaterial("pOneMaterial");
-            pOneMaterial.diffuseTexture = new BABYLON.Texture("img/GoldTexture.png");
-            pOneMaterial.specularTexture = new BABYLON.Texture("img/GoldTexture.png");
-            pOneMaterial.emissiveTexture = new BABYLON.Texture("img/GoldTexture.png");
-            pOneMaterial.ambientTexture = new BABYLON.Texture("img/GoldTexture.png");
+            pOneMaterial.diffuseTexture = new BABYLON.Texture("img/LightWood.jpg");
+            pOneMaterial.specularTexture = new BABYLON.Texture("img/LightWood.jpg");
+            pOneMaterial.emissiveTexture = new BABYLON.Texture("img/LightWood.jpg");
+            pOneMaterial.ambientTexture = new BABYLON.Texture("img/LightWood.jpg");
 
             const pTwoMaterial = new BABYLON.StandardMaterial("pTwoMaterial");
             pTwoMaterial.diffuseTexture = new BABYLON.Texture("img/RedTexture.jpg");
@@ -181,33 +177,38 @@
             highlight.blurVerticalSize = 0.3 + Math.sin(0 / 3) * 0.6 + 0.6;
 
             // Create an individual tile for the checkerboard
-            function createBox(positionX, positionY, material, row, col, height, width, depth) {
-                const box = BABYLON.MeshBuilder.CreateBox("row_" + row + " " + "col_" + col, { height: height, width: width, depth: depth });
+            function createBox(positionX, positionY, material, height, width, depth) {
+                const box = BABYLON.MeshBuilder.CreateBox("t" + positionX + positionY, { height: height, width: width, depth: depth });
+
+                // an ID of "e" means empty. "f" means full
+                box.id = "e";
                 box.material = material;
-                box.position.y = positionY;
                 box.position.x = positionX;
+                box.position.y = positionY;
                 box.receiveShadows = true;
             }
 
             // Creates the checker piceces
-            function createChecker(positionX, positionY, material, row, col, id) {
+            function createChecker(positionX, positionY, material, id) {
                 var cylinder = BABYLON.MeshBuilder.CreateCylinder(id, { tessellation: 32, diameter: 0.85, height: 0.20 });
 
                 var torus = BABYLON.MeshBuilder.CreateTorus("torus", { thickness: 0.10, diameter: 0.75, tessellation: 32 });
                 torus.position.y = 0.1;
 
                 var checker = BABYLON.Mesh.MergeMeshes([cylinder, torus]);
-
                 checker.material = material;
                 checker.position.x = positionX;
                 checker.position.y = positionY;
 
                 // "p" for normal piece, "k" for king
                 checker.id = "p" + checker.position.x + checker.position.y;
-
                 checker.rotation = new BABYLON.Vector3(0, 0, 0);
                 checker.rotation.x = 1.5708;
                 checker.position.z = 0.10;
+
+                // update tile to be full
+                var selectedTile = scene.getMeshByName("t" + positionX + positionY);
+                selectedTile.id = "f";
 
                 shadowGenerator.addShadowCaster(checker);
             }
@@ -224,7 +225,7 @@
                         } else {
                             material = blackMaterial;
                         }
-                        createBox(xVal, yVal, material, row, col, 1, 1, 0.05);
+                        createBox(xVal, yVal, material, 1, 1, 0.05);
                         xVal += 1;
                     }
                     yVal += 1;
@@ -244,7 +245,7 @@
                     for (let col = 0; col < 8; col++) {
                         if (row % 2 === col % 2) {
                             // player 1 piece, denoted by 1_ and then the checker piece ID
-                            createChecker(xVal, yVal, playerOneMaterial, row, col, "1_" + playerOneID);
+                            createChecker(xVal, yVal, playerOneMaterial, "1_" + playerOneID);
                             playerOneID++;
                         }
                         xVal += 1;
@@ -259,7 +260,7 @@
                     for (let col = 8; col > 0; col--) {
                         if (row % 2 === col % 2) {
                             // player 1 piece, denoted by 1_ and then the checker piece ID
-                            createChecker(xVal, yVal, playerTwoMaterial, row, col, "2_" + playerTwoID);
+                            createChecker(xVal, yVal, playerTwoMaterial, "2_" + playerTwoID);
                             playerTwoID++;
                         }
                         xVal -= 1;
@@ -276,20 +277,26 @@
             // This determines if a move is valid
             function isValidMove(piece, tile, turn) {
                 if (turn) {
-                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "1");
+                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "1" && tile.id === "e");
                 } else if (!turn) {
-                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "2");
+                    return (isChecker(piece) && tile.material.name === "White" && piece.name[0] === "2" && tile.id === "e");
                 }
             }
 
-            // function isKing(piece) {
-            //     if (piece.)
-            // }
-
-            // Moves piece from point a to b. 
+            // moves piece from point a to b. 
             function movePiece(piece, tile) {
-                const moveAnimation = new BABYLON.Animation("moveAnimation", "position", 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
+                // updates old/new tiles to be empty/full respectively
+                var selectedTile = scene.getMeshByName("t" + piece.position.x + piece.position.y);
+                selectedTile.id = "e";
+
+                var selectedTile2 = scene.getMeshByName("t" + tile.position.x + "" + tile.position.y);
+                selectedTile2.id = "f";
+
+                // animation variable
+                const moveAnimation = new BABYLON.Animation("moveAnimation", "position", 45, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+                // Animation keys
                 var keys = []
                 keys.push({
                     frame: 0,
@@ -316,6 +323,7 @@
                 var checkerMoveAnimation = scene.beginAnimation(piece, 0, 25, false);
 
                 checkerMoveAnimation.onAnimationEnd = function () {
+
                     highlight.removeMesh(piece);
                     piece.id = "p" + piece.position.x + "" + piece.position.y;
                     if (turn) {
@@ -338,9 +346,9 @@
             scene.onPointerDown = function (evt, pickResult) {
 
                 if (pickResult.hit) {
-                    infoText.text = pickResult.pickedMesh.name + " \n" + "xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y;
+                    infoText.text = pickResult.pickedMesh.name + " \n" + "xy: " + pickResult.pickedMesh.position.x + pickResult.pickedMesh.position.y + " \n" + pickResult.pickedMesh.id;
                     console.log("Mesh ID: " + pickResult.pickedMesh.id);
-                    console.log(turn);
+
                     if (lastSelection) {
                         if (isValidMove(lastSelection, pickResult.pickedMesh, turn)) {
                             movePiece(lastSelection, pickResult.pickedMesh, turn);
@@ -361,7 +369,6 @@
                 }
                 else {
                     lastSelection = null;
-                    // console.log(lastSelection);
                 }
             };
 
