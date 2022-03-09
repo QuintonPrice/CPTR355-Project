@@ -61,7 +61,7 @@
 
             // Camera
             var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
-            camera.setPosition(new BABYLON.Vector3(4, 4, 15));
+            camera.setPosition(new BABYLON.Vector3(4, 4, 25));
             camera.attachControl(canvas, true);
             camera.allowUpsideDown = true;
             camera.invertRotation = false;
@@ -76,19 +76,30 @@
             var lightOn = true;
             light.setEnabled(lightOn);
 
+            // Skybox Setup
+            function setupSkybox() {
+                var skybox = new BABYLON.PhotoDome(
+                    "testdome",
+                    "./img/sky.jpg",
+                    {
+                        resolution: 32,
+                        size: 500,
+                    },
+                );
+                skybox.imageMode = BABYLON.PhotoDome.MODE_MONOSCOPIC;
+            }
+
             // Particles
             const jumpParticles = new BABYLON.ParticleSystem("particles", 2000);
             jumpParticles.particleTexture = new BABYLON.Texture("img/flare.png");
             jumpParticles.emitRate = 100;
             jumpParticles.manualEmitCount = 500;
 
-
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
                 true, // Do you want the pipeline to use HDR texture?
                 scene, // The scene instance
-                [camera] // The list of cameras to be attached to
             );
 
             pipeline.samples = 32;
@@ -288,11 +299,6 @@
                 shadowGenerator.addShadowCaster(borderPiece);
 
             }
-            
-            createBorder(3.5, -0.65, whiteMaterial, 0.3, 8.5);
-            createBorder(3.5, 7.65, whiteMaterial, 0.3, 8.5);
-            createBorder(-0.6, 3.5, whiteMaterial, 8.5, 0.3);
-            createBorder(7.6, 3.5, whiteMaterial, 8.5, 0.3);
 
             // Create the checkerboard
             function createBoard(size) {
@@ -319,6 +325,11 @@
                     yVal += 1;
                 }
                 createTable();
+                createBorder(3.5, -0.65, whiteMaterial, 0.3, 8.5);
+                createBorder(3.5, 7.65, whiteMaterial, 0.3, 8.5);
+                createBorder(-0.6, 3.5, whiteMaterial, 8.5, 0.3);
+                createBorder(7.6, 3.5, whiteMaterial, 8.5, 0.3);
+
             }
 
             // Populates the board with checkers pieces
@@ -557,6 +568,7 @@
             function initalizeGame() {
                 createBoard(8);
                 populateBoard(pOneMaterial, pTwoMaterial);
+                setupSkybox();
                 turn = true;
                 lastSelection = null;
             }
