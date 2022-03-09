@@ -130,7 +130,24 @@
                 lightOn = !lightOn;
             });
             leftPanel.addControl(toggleLightButton);
+            
+            // Mute button
+            var muteSound = false;
+            var muteButton = BABYLON.GUI.Button.CreateSimpleButton("mute", "Mute/Unmute Sound");
+            muteButton.width = guiWidthLeft;
+            muteButton.height = "45px";
+            muteButton.color = "white";
+            muteButton.background = "orange";
+            muteButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            muteButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
+            // Toggle the light switch
+            muteButton.onPointerUpObservable.add(function () {
+                muteSound = !muteSound;
+            });
+            leftPanel.addControl(muteButton);
+
+            // Reset game button
             var resetGameButton = BABYLON.GUI.Button.CreateSimpleButton("resetGame", "Reset Game");
             resetGameButton.width = guiWidthLeft;
             resetGameButton.height = "40px";
@@ -186,6 +203,14 @@
             var highlight = new BABYLON.HighlightLayer("highlight", scene);
             highlight.blurHorizontalSize = 0.3 + Math.cos(0) * 0.6 + 0.6;
             highlight.blurVerticalSize = 0.3 + Math.sin(0 / 3) * 0.6 + 0.6;
+
+            // Sound for moving checkers
+            var moveSound = new BABYLON.Sound("Music", "sound/moving_effect.wav", scene, null, {
+                loop: false,
+                volume: 1,
+                autoplay: false
+            });
+
 
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, height, width, depth) {
@@ -334,6 +359,10 @@
                 var checkerMoveAnimation = scene.beginAnimation(piece, 0, 25, false);
 
                 checkerMoveAnimation.onAnimationEnd = function () {
+
+                    if (!muteSound) {
+                        moveSound.play();
+                    }
 
                     highlight.removeMesh(piece);
                     piece.id = "p" + piece.position.x + "" + piece.position.y;
