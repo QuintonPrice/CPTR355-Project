@@ -61,12 +61,10 @@
 
             // Parameters: name, alpha, beta, radius, target position, scene
             var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
-
-            // Positions the camera
             camera.setPosition(new BABYLON.Vector3(4, 4, 15));
-
-            // This attaches the camera to the canvas
             camera.attachControl(canvas, true);
+            camera.allowUpsideDown = true;
+            camera.invertRotation = false;
 
             // Setup lights
             const hemiLight = new BABYLON.HemisphericLight("hemiLght", new BABYLON.Vector3(1, 1, 0));
@@ -132,6 +130,19 @@
                 lightOn = !lightOn;
             });
             leftPanel.addControl(toggleLightButton);
+
+            var resetGameButton = BABYLON.GUI.Button.CreateSimpleButton("resetGame", "Reset Game");
+            resetGameButton.width = guiWidthLeft;
+            resetGameButton.height = "40px";
+            resetGameButton.color = "white";
+            resetGameButton.background = "red";
+            resetGameButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            resetGameButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            // Reset the game
+            resetGameButton.onPointerUpObservable.add(function () {
+                resetGame();
+            });
+            leftPanel.addControl(resetGameButton);
 
             // Status indicator
             var infoText = new BABYLON.GUI.TextBlock();
@@ -332,7 +343,6 @@
                         turnText.text = "Turn: Player 2"
                     }
                 }
-
             }
 
             // Used to "store" the piece that is selected
@@ -371,6 +381,20 @@
                     lastSelection = null;
                 }
             };
+
+            function resetGame() {
+                for (var i = 0; i < scene.meshes.length; i++) {
+                    scene.meshes[i].dispose();
+                    i--;
+                }
+
+                createBoard(8);
+                populateBoard(pOneMaterial, pTwoMaterial);
+                turn = true;
+                lastSelection = null;
+
+            }
+
 
             createBoard(8);
             populateBoard(pOneMaterial, pTwoMaterial);
