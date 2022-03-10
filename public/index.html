@@ -110,7 +110,6 @@
                 jumpParticles.start();
             }
 
-
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
@@ -208,14 +207,16 @@
             infoText.fontSize = 24;
             rightPanel.addControl(infoText);
 
-            var turnText = new BABYLON.GUI.TextBlock();
-            turnText.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
-            turnText.text = "Player 1's Turn";
-            turnText.width = guiWidthRight;
-            turnText.height = "100px";
-            turnText.color = "white";
-            turnText.fontSize = 24;
-            rightPanel.addControl(turnText);
+            // Tells whose turn it is
+            var turnText1 = new BABYLON.GUI.TextBlock();
+            turnText1.text = "Player 1's turn"
+            turnText1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
+            turnText1.width = guiWidthRight;
+            turnText1.height = "100px";
+            turnText1.color = "white";
+            turnText1.fontSize = 24;
+            rightPanel.addControl(turnText1);
+
 
             // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
@@ -435,20 +436,20 @@
                             return false;
                         }
                     }
-
                 } else {
                     if (((piece.position.x + 2 === tile.position.x) || (piece.position.x - 2 === tile.position.x)) && piece.position.y - 2 === tile.position.y) {
                         name = "1_" + (piece.position.x + 1) + (piece.position.y - 1);
                         name2 = "1_" + (piece.position.x - 1) + (piece.position.y - 1);
                         console.log((name));
                         console.log((name2));
+
                         if (scene.getMeshByName(name) != null) {
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y - 1));
                             jumpedTile.id = "e";
 
                             playJumpParticles(jumpedTile);
                             scene.getMeshByName(name).dispose();
-                            
+
                             return true;
                         } else if (scene.getMeshByName(name2) != null) {
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y - 1));
@@ -521,9 +522,9 @@
                     highlight.removeMesh(piece);
                     piece.name = piece.name[0] + "_" + tile.position.x + tile.position.y;
                     if (turn) {
-                        turnText.text = "Player 1's Turn"
+                        turnText1.text = "Player 1's turn";
                     } else {
-                        turnText.text = "Player 2's Turn"
+                        turnText1.text = "Player 2's turn"
                     }
                 }
             }
@@ -544,7 +545,10 @@
 
                     if (lastSelection) {
                         if (isValidMove(lastSelection, pickResult.pickedMesh, turn)) {
-                            movePiece(lastSelection, pickResult.pickedMesh, turn);
+                            do {
+                                movePiece(lastSelection, pickResult.pickedMesh, turn);
+                            }
+                            while (isJumpable(lastSelection, pickResult.pickedMesh, turn));
                             turn = !turn;
                         }
 
@@ -579,7 +583,7 @@
                 populateBoard(pOneMaterial, pTwoMaterial);
                 importPicnicScene();
 
-                // setupSkybox();
+                setupSkybox();
                 turn = true;
                 lastSelection = null;
             }
