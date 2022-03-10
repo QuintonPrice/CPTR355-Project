@@ -169,7 +169,7 @@
 
             // Mute button
             var muteSound = false;
-            var muteButton = BABYLON.GUI.Button.CreateSimpleButton("mute", "Mute/Unmute Sound");
+            var muteButton = BABYLON.GUI.Button.CreateSimpleButton("mute", "Mute/Unmute Game Sound");
             muteButton.width = guiWidthLeft;
             muteButton.height = "45px";
             muteButton.color = "white";
@@ -188,7 +188,7 @@
             resetGameButton.width = guiWidthLeft;
             resetGameButton.height = "40px";
             resetGameButton.color = "white";
-            resetGameButton.background = "red";
+            resetGameButton.background = "grey";
             resetGameButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             resetGameButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
             // Reset the game
@@ -217,6 +217,45 @@
             turnText1.fontSize = 24;
             rightPanel.addControl(turnText1);
 
+            var volumeSliderText = BABYLON.GUI.Button.CreateSimpleButton("resetGame", "Music Volume:");
+            volumeSliderText.width = guiWidthLeft;
+            volumeSliderText.height = "40px";
+            volumeSliderText.color = "white";
+            volumeSliderText.background = "grey";
+            volumeSliderText.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            volumeSliderText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            leftPanel.addControl(volumeSliderText);
+
+            // Volume slider for background music
+            var volumeSlider = new BABYLON.GUI.Slider();
+            volumeSlider.padding = "10px";
+            volumeSlider.minimum = 0;
+            volumeSlider.maximum = 1;
+            volumeSlider.value = 1;
+            volumeSlider.color = "green";
+            volumeSlider.borderColor = "white";
+            volumeSlider.height = "20px";
+            volumeSlider.width = guiWidthLeft;
+            volumeSlider.onValueChangedObservable.add(function (value) {
+                jazzMusic.setVolume(value);
+                console.log(value);
+                console.log("music volume: jazzMusic.volume");
+            });
+            leftPanel.addControl(volumeSlider);
+
+            // Sound for moving checkers
+            var moveSound = new BABYLON.Sound("moveSound", "sound/moving_effect.wav", scene, null, {
+                loop: false,
+                volume: 1,
+                autoplay: false
+            });
+
+            // Background music
+            var jazzMusic = new BABYLON.Sound("Music", "sound/jazz_music.mp3", scene, null, {
+                loop: true,
+                volume: volumeSlider.value,
+                autoplay: true
+            });
 
             // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
@@ -242,12 +281,7 @@
             highlight.blurHorizontalSize = 0.3 + Math.cos(0) * 0.6 + 0.6;
             highlight.blurVerticalSize = 0.3 + Math.sin(0 / 3) * 0.6 + 0.6;
 
-            // Sound for moving checkers
-            var moveSound = new BABYLON.Sound("Music", "sound/moving_effect.wav", scene, null, {
-                loop: false,
-                volume: 1,
-                autoplay: false
-            });
+
 
             // Import table from Blender file
             function importPicnicScene() {
