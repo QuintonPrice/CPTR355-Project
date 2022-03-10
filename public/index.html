@@ -70,7 +70,7 @@
             const hemiLight = new BABYLON.HemisphericLight("hemiLght", new BABYLON.Vector3(1, 1, 0));
             hemiLight.intensity = 1;
 
-            const light = new BABYLON.PointLight("light", new BABYLON.Vector3(0, 9, 2), scene);
+            const light = new BABYLON.PointLight("light", new BABYLON.Vector3(-4, 9, 2), scene);
             light.intensity = 1.5;
 
             var lightOn = true;
@@ -98,17 +98,19 @@
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
-                true, // Do you want the pipeline to use HDR texture?
+                false, // Do you want the pipeline to use HDR texture?
                 scene, // The scene instance
             );
 
             pipeline.samples = 32;
 
             // Shadows
-            var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
-            shadowGenerator.useExponentialShadowMap = true;
+            var shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
+            shadowGenerator.useCloseExponentialShadowMap = true
             shadowGenerator.useKernelBlur = true;
-            shadowGenerator.blurKernel = 4;
+            light.shadowMinZ = 0;
+            light.shadowMaxZ = 15;
+            shadowGenerator.blurKernel = 64;
 
             // GUI
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -139,7 +141,7 @@
             toggleLightButton.width = guiWidthLeft;
             toggleLightButton.height = "40px";
             toggleLightButton.color = "white";
-            toggleLightButton.background = "orange";
+            toggleLightButton.background = "grey";
             toggleLightButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             toggleLightButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
             // Toggle the light switch
@@ -156,7 +158,7 @@
             muteButton.width = guiWidthLeft;
             muteButton.height = "45px";
             muteButton.color = "white";
-            muteButton.background = "orange";
+            muteButton.background = "grey";
             muteButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             muteButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
@@ -218,13 +220,6 @@
             pTwoMaterial.emissiveTexture = new BABYLON.Texture("img/RedTexture.jpg");
             pTwoMaterial.ambientTexture = new BABYLON.Texture("img/RedTexture.jpg");
 
-            const tableMaterial = new BABYLON.StandardMaterial("tableMaterial");
-            tableMaterial.diffuseTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            tableMaterial.specularTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            tableMaterial.emissiveTexture = new BABYLON.Texture("img/DarkWood.jpg");
-            tableMaterial.ambientTexture = new BABYLON.Texture("img/DarkWood.jpg");
-
-
             // Highlight variables for picking pieces
             var highlight = new BABYLON.HighlightLayer("highlight", scene);
             highlight.blurHorizontalSize = 0.3 + Math.cos(0) * 0.6 + 0.6;
@@ -238,19 +233,26 @@
             });
 
             // Import table from Blender file
-            function importPicnicTable() {
+            function importPicnicScene() {
                 var picnicTable
-                BABYLON.SceneLoader.ImportMesh("", "models/", "table.glb", scene, function (newMeshes) {
-                    // Set the target of the camera to the first imported mesh
+                BABYLON.SceneLoader.ImportMesh("", "models/", "picnicTable.glb", scene, function (newMeshes) {
+
+                    for (let i = 0; i < 7; i++) {
+                        newMeshes[i].receiveShadows = true;
+                        console.log(newMeshes[i]);
+                    }
                     picnicTable = newMeshes[0];
+                    console.log(newMeshes);
                     picnicTable.rotation = new BABYLON.Vector3(1.5708, 0, 0);
-                    picnicTable.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
-                    picnicTable.position.z = -0.2;
+                    picnicTable.scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
+                    picnicTable.position.z = -1.25;
                     picnicTable.position.x = 3.5;
-                    picnicTable.position.y = 3.5
+                    picnicTable.position.y = 3;
+
+                    picnicTable.receiveShadows = true;
+                    // shadowGenerator.addShadowCaster(picnicTable);
                 });
             }
-            importPicnicTable();
 
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, height, width, depth) {
@@ -289,18 +291,6 @@
                 shadowGenerator.addShadowCaster(checker);
             }
 
-            // Creates the table that the board sits on
-            function createTable() {
-                var table = BABYLON.MeshBuilder.CreateCylinder("table", { height: 0.25, diameter: 20, tessellation: 6 }, scene);
-                table.rotation = new BABYLON.Vector3(1.5708, 0, 0);
-                table.position.x = 3.5;
-                table.position.y = 3.5;
-                table.position.z = -0.25;
-                table.material = tableMaterial;
-                table.receiveShadows = true;
-
-            }
-
             // Creates border around checkerboard
             function createBorder(positionX, positionY, material, height, width) {
                 const borderPiece = BABYLON.MeshBuilder.CreateBox("border", { height: height, width: width, depth: 0.75 });
@@ -332,7 +322,6 @@
                     }
                     yVal += 1;
                 }
-                createTable();
                 createBorder(3.5, -0.65, whiteMaterial, 0.3, 8.5);
                 createBorder(3.5, 7.65, whiteMaterial, 0.3, 8.5);
                 createBorder(-0.6, 3.5, whiteMaterial, 8.5, 0.3);
@@ -576,6 +565,8 @@
             function initalizeGame() {
                 createBoard(8);
                 populateBoard(pOneMaterial, pTwoMaterial);
+                importPicnicScene();
+
                 // setupSkybox();
                 turn = true;
                 lastSelection = null;
