@@ -59,6 +59,10 @@
         const createScene = function () {
             const scene = new BABYLON.Scene(engine);
 
+            // Pieces remaining
+            var pOnePieces = 0;
+            var pTwoPieces = 0;
+
             // Camera
             var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
             camera.setPosition(new BABYLON.Vector3(4, 4, 25));
@@ -131,13 +135,13 @@
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
             var guiWidthLeft = "150px";
-            var guiWidthRight = "300px";
+            var guiWidthRight = "200px";
 
             // Stack panel right
             var rightPanel = new BABYLON.GUI.StackPanel();
             rightPanel.width = guiWidthRight;
             rightPanel.isVertical = true;
-            rightPanel.paddingRight = "20px";
+            rightPanel.paddingLeft = "20px";
             rightPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
             rightPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
             advancedTexture.addControl(rightPanel);
@@ -150,6 +154,43 @@
             leftPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
             leftPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
             advancedTexture.addControl(leftPanel);
+
+            // Player pieces count
+            var pOnePiecesText = new BABYLON.GUI.TextBlock();
+            pOnePiecesText.text = "P1 Pieces: " + pOnePieces;
+            pOnePiecesText.width = guiWidthRight;
+            pOnePiecesText.height = "35px";
+            pOnePiecesText.color = "white";
+            pOnePiecesText.fontSize = 24;
+            rightPanel.addControl(pOnePiecesText);
+
+            var pTwoPiecesText = new BABYLON.GUI.TextBlock();
+            pTwoPiecesText.text = "P2 Pieces: " + pTwoPieces;
+            pTwoPiecesText.width = guiWidthRight;
+            pTwoPiecesText.height = "35px";
+            pTwoPiecesText.color = "white";
+            pTwoPiecesText.fontSize = 24;
+            rightPanel.addControl(pTwoPiecesText);
+
+            // Tells whose turn it is
+            var turnText1 = new BABYLON.GUI.TextBlock();
+            turnText1.text = "Player 1's turn"
+            turnText1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
+            turnText1.width = guiWidthRight;
+            turnText1.height = "50px";
+            turnText1.color = "white";
+            turnText1.fontSize = 24;
+            rightPanel.addControl(turnText1);
+
+            // Status indicator
+            var infoText = new BABYLON.GUI.TextBlock();
+            infoText.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
+            infoText.text = "None Selected";
+            infoText.width = "300px";
+            infoText.height = "100px";
+            infoText.color = "white";
+            infoText.fontSize = 24;
+            rightPanel.addControl(infoText);
 
             // Light toggle button
             var toggleLightButton = BABYLON.GUI.Button.CreateSimpleButton("toggleLight", "Toggle Lamp");
@@ -197,25 +238,6 @@
             });
             leftPanel.addControl(resetGameButton);
 
-            // Status indicator
-            var infoText = new BABYLON.GUI.TextBlock();
-            infoText.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
-            infoText.text = "None Selected";
-            infoText.width = guiWidthRight;
-            infoText.height = "100px";
-            infoText.color = "white";
-            infoText.fontSize = 24;
-            rightPanel.addControl(infoText);
-
-            // Tells whose turn it is
-            var turnText1 = new BABYLON.GUI.TextBlock();
-            turnText1.text = "Player 1's turn"
-            turnText1.textWrapping = BABYLON.GUI.TextWrapping.WordWrap;
-            turnText1.width = guiWidthRight;
-            turnText1.height = "100px";
-            turnText1.color = "white";
-            turnText1.fontSize = 24;
-            rightPanel.addControl(turnText1);
 
             var volumeSliderText = BABYLON.GUI.Button.CreateSimpleButton("resetGame", "Music Volume:");
             volumeSliderText.width = guiWidthLeft;
@@ -238,8 +260,6 @@
             volumeSlider.width = guiWidthLeft;
             volumeSlider.onValueChangedObservable.add(function (value) {
                 jazzMusic.setVolume(value);
-                console.log(value);
-                console.log("music volume: jazzMusic.volume");
             });
             leftPanel.addControl(volumeSlider);
 
@@ -281,17 +301,15 @@
             highlight.blurHorizontalSize = 0.3 + Math.cos(0) * 0.6 + 0.6;
             highlight.blurVerticalSize = 0.3 + Math.sin(0 / 3) * 0.6 + 0.6;
 
-
-
             // Import table from Blender file
             function importPicnicScene() {
                 var picnicTable
                 BABYLON.SceneLoader.ImportMesh("", "models/", "picnicTable.glb", scene, function (newMeshes) {
 
-                    for (let i = 0; i < 7; i++) {
-                        newMeshes[i].receiveShadows = true;
-                        console.log(newMeshes[i]);
-                    }
+                    // for (let i = 0; i < 7; i++) {
+                    //     newMeshes[i].receiveShadows = true;
+                    //     console.log(newMeshes[i]);
+                    // }
                     var book = newMeshes[4];
 
                     // add actionManager on book
@@ -307,7 +325,7 @@
                     );
 
                     picnicTable = newMeshes[0];
-                    console.log(newMeshes);
+                    // console.log(newMeshes);
                     picnicTable.rotation = new BABYLON.Vector3(1.5708, 0, 0);
                     picnicTable.scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
                     picnicTable.position.z = -1.25;
@@ -397,9 +415,6 @@
             // Populates the board with checkers pieces
             function populateBoard(playerOneMaterial, playerTwoMaterial) {
 
-                var playerOneID = 0;
-                var playerTwoID = 0;
-
                 // Player 1 pieces
                 var yVal = 0;
                 for (let row = 0; row < 3; row++) {
@@ -408,7 +423,8 @@
                         if (row % 2 === col % 2) {
                             // player 1 piece, denoted by 1_ and then the checker piece ID
                             createChecker(xVal, yVal, playerOneMaterial, "1_");
-                            playerOneID++;
+                            pOnePieces++;
+                            pOnePiecesText.text = "P1 Pieces: " + pOnePieces;
                         }
                         xVal += 1;
                     }
@@ -423,7 +439,8 @@
                         if (row % 2 === col % 2) {
                             // player 1 piece, denoted by 1_ and then the checker piece ID
                             createChecker(xVal, yVal, playerTwoMaterial, "2_");
-                            playerTwoID++;
+                            pTwoPieces++;
+                            pTwoPiecesText.text = "P2 Pieces: " + pTwoPieces;
                         }
                         xVal -= 1;
                     }
@@ -452,67 +469,58 @@
                 }
             }
 
+            function jumpPiece(piece, turn, jumpedTile) {
+
+                playJumpParticles(jumpedTile);
+                removePiece(piece, turn);
+            }
+
             // Tells if piece is jumpable
             // If so, removes jumped piece, adds particles
             function isJumpable(piece, tile, turn) {
                 var name;
-                var name2;
                 var jumpedTile;
+
                 if (turn) {
-                    if (((piece.position.x + 2 === tile.position.x) || (piece.position.x - 2 === tile.position.x)) && piece.position.y + 2 === tile.position.y) {
+                    if ((piece.position.x + 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
                         name = "2_" + (piece.position.x + 1) + (piece.position.y + 1);
-                        name2 = "2_" + (piece.position.x - 1) + (piece.position.y + 1);
-                        console.log((name));
-                        console.log((name2));
                         if (scene.getMeshByName(name) != null) {
+
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y + 1));
-                            jumpedTile.id = "e";
-
-                            playJumpParticles(jumpedTile);
-                            scene.getMeshByName(name).dispose();
-
+                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
-                        } else if (scene.getMeshByName(name2) != null) {
+                        }
+                    } else if ((piece.position.x - 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
+                        name = "2_" + (piece.position.x - 1) + (piece.position.y + 1);
+                        if (scene.getMeshByName(name) != null) {
+
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y + 1));
-                            jumpedTile.id = "e";
-
-                            playJumpParticles(jumpedTile);
-                            scene.getMeshByName(name2).dispose();
-
+                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
-                        } else {
-                            return false;
                         }
                     }
                 } else {
-                    if (((piece.position.x + 2 === tile.position.x) || (piece.position.x - 2 === tile.position.x)) && piece.position.y - 2 === tile.position.y) {
+
+                    if ((piece.position.x + 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
                         name = "1_" + (piece.position.x + 1) + (piece.position.y - 1);
-                        name2 = "1_" + (piece.position.x - 1) + (piece.position.y - 1);
-                        console.log((name));
-                        console.log((name2));
-
                         if (scene.getMeshByName(name) != null) {
+
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y - 1));
-                            jumpedTile.id = "e";
-
-                            playJumpParticles(jumpedTile);
-                            scene.getMeshByName(name).dispose();
-
+                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
-                        } else if (scene.getMeshByName(name2) != null) {
+                        }
+                    } else if ((piece.position.x - 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
+                        name = "1_" + (piece.position.x - 1) + (piece.position.y - 1);
+                        if (scene.getMeshByName(name) != null) {
+
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y - 1));
-                            jumpedTile.id = "e";
-
-                            playJumpParticles(jumpedTile);
-                            scene.getMeshByName(name2).dispose();
-
+                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
-                        } else {
-                            return false;
                         }
                     }
                 }
             }
+
 
             // This determines if a move is valid
             function isValidMove(piece, tile, turn) {
@@ -520,6 +528,18 @@
                     return (isChecker(piece) && piece.name[0] === "1" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
                 } else if (!turn) {
                     return (isChecker(piece) && piece.name[0] === "2" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
+                }
+            }
+
+            // Removes a piece
+            function removePiece(piece, turn) {
+                piece.dispose();
+                if (turn) {
+                    pTwoPieces -= 1;
+                    pTwoPiecesText.text = "P2 Pieces: " + pTwoPieces;
+                } else {
+                    pOnePieces -= 1;
+                    pOnePiecesText.text = "P1 Pieces: " + pOnePieces;
                 }
             }
 
@@ -617,7 +637,6 @@
                 }
             };
 
-
             // Resets game and game state
             function resetGame() {
                 for (var i = 0; i < scene.meshes.length; i++) {
@@ -627,6 +646,7 @@
                 initalizeGame();
             }
 
+            // Initializes game
             function initalizeGame() {
                 createBoard(8);
                 populateBoard(pOneMaterial, pTwoMaterial);
@@ -635,6 +655,9 @@
                 setupSkybox();
                 turn = true;
                 lastSelection = null;
+
+                console.log("Player one pieces: " + pOnePieces);
+                console.log("Player two pieces: " + pTwoPieces);
             }
 
             initalizeGame();
