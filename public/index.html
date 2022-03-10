@@ -103,6 +103,7 @@
                 jumpParticles.manualEmitCount = 100;
                 jumpParticles.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
                 jumpParticles.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+                jumpParticles.color3 = new BABYLON.Color4(255 / 255, 255 / 153, 255 / 131, 1.0);
                 jumpParticles.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
                 jumpParticles.minSize = 0.1;
                 jumpParticles.maxSize = 0.5
@@ -448,9 +449,14 @@
                 }
             }
 
-            // Determines if clicked piece is a checker piece
-            function isChecker(piece) {
-                return (piece.material.name === "pOneMaterial" || piece.material.name === "pTwoMaterial");
+            // Checks if piece is checker
+            function isPeon(piece) {
+                return (piece.id === "p");
+            }
+
+            // Checks if piece is king
+            function isKing(piece) {
+                return (piece.id === "k");
             }
 
             // Checks to make sure tile is available
@@ -469,8 +475,10 @@
                 }
             }
 
-            function jumpPiece(piece, turn, jumpedTile) {
+            // Plays particles andr removes jumped piece
+            function removeJumpedPiece(piece, turn, jumpedTile) {
 
+                jumpedTile.id = "e";
                 playJumpParticles(jumpedTile);
                 removePiece(piece, turn);
             }
@@ -489,7 +497,7 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y + 1));
-                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
                         }
                         // If jumping up and left
@@ -498,12 +506,12 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y + 1));
-                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
                         }
                     }
                 }
-                
+
                 // If player two's turn
                 else {
                     // If jumping down and right
@@ -512,7 +520,7 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y - 1));
-                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
                         }
                     }
@@ -522,20 +530,19 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y - 1));
-                            jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
                         }
                     }
                 }
             }
 
-
             // This determines if a move is valid
             function isValidMove(piece, tile, turn) {
                 if (turn) {
-                    return (isChecker(piece) && piece.name[0] === "1" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
+                    return (isPeon(piece) && piece.name[0] === "1" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
                 } else if (!turn) {
-                    return (isChecker(piece) && piece.name[0] === "2" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
+                    return (isPeon(piece) && piece.name[0] === "2" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
                 }
             }
 
@@ -635,7 +642,7 @@
                     } else {
                         lastSelection = pickResult.pickedMesh;
 
-                        if (isChecker(lastSelection)) {
+                        if (isPeon(lastSelection)) {
                             highlight.addMesh(lastSelection, BABYLON.Color3.Yellow());
                         }
                     }
