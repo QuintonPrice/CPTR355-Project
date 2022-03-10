@@ -80,7 +80,7 @@
             function setupSkybox() {
                 var skybox = new BABYLON.PhotoDome(
                     "testdome",
-                    "./img/sky.jpg",
+                    "./img/sky2.jpeg",
                     {
                         resolution: 32,
                         size: 500,
@@ -237,6 +237,13 @@
                 autoplay: false
             });
 
+            // // Import table from Blender file
+            // function importPicnicTable() {
+            //     var picnicTable = BABYLON.SceneLoader.ImportMesh("Wooden Table", "models/", "table.glb", scene, function (meshes) {
+            //         scene.createDefaultCameraOrLight(false,false,false);
+            //     });
+            // }
+            // importPicnicTable();
 
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, height, width, depth) {
@@ -284,6 +291,7 @@
                 table.position.z = -0.25;
                 table.material = tableMaterial;
                 table.receiveShadows = true;
+
             }
 
 
@@ -313,13 +321,7 @@
                             material = blackMaterial;
                         }
                         createBox(xVal, yVal, material, 1, 1, 0.25);
-                        // if (yVal === 0) {
-                        //     createBorder(xVal, yVal - 0.65, whiteMaterial, 0.35, 1.125);
-                        // } if (yVal === 7) {
-                        //     createBorder(xVal, yVal + 0.65, whiteMaterial, 0.35, 1.125);
-                        // } if (xVal === 0) {
-                        //     createBorder(xVal - 0.65, yVal, whiteMaterial, 1.125, 0.35);
-                        // }
+
                         xVal += 1;
                     }
                     yVal += 1;
@@ -531,7 +533,7 @@
 
                 if (pickResult.hit) {
                     infoText.text = pickResult.pickedMesh.name + " \n" + pickResult.pickedMesh.id;
-                    console.log("Mesh ID: " + pickResult.pickedMesh.id);
+                    console.log(pickResult.pickedMesh);
 
                     if (lastSelection) {
                         if (isValidMove(lastSelection, pickResult.pickedMesh, turn)) {
