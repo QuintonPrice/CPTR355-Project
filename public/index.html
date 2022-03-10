@@ -258,6 +258,20 @@
                         newMeshes[i].receiveShadows = true;
                         console.log(newMeshes[i]);
                     }
+                    var book = newMeshes[4];
+
+                    // add actionManager on book
+                    book.actionManager = new BABYLON.ActionManager(scene);
+
+                    book.actionManager.registerAction(
+                        new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger,
+                            function (event) {
+                                var pickedMesh = event.meshUnderPointer;
+
+                                window.open("https://www.wikihow.com/Play-Checkers");
+                            })
+                    );
+
                     picnicTable = newMeshes[0];
                     console.log(newMeshes);
                     picnicTable.rotation = new BABYLON.Vector3(1.5708, 0, 0);
@@ -568,6 +582,7 @@
                     lastSelection = null;
                 }
             };
+
 
             // Resets game and game state
             function resetGame() {
