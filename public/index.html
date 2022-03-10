@@ -90,10 +90,26 @@
             }
 
             // Particles
-            const jumpParticles = new BABYLON.ParticleSystem("particles", 2000);
-            jumpParticles.particleTexture = new BABYLON.Texture("img/flare.png");
-            jumpParticles.emitRate = 100;
-            jumpParticles.manualEmitCount = 500;
+            function playJumpParticles(emitter) {
+                const jumpParticles = new BABYLON.ParticleSystem("particles", 1000);
+                jumpParticles.emitter = emitter;
+
+                jumpParticles.particleTexture = new BABYLON.Texture("img/flare.png");
+                jumpParticles.emitRate = 20;
+                jumpParticles.manualEmitCount = 100;
+                jumpParticles.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+                jumpParticles.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+                jumpParticles.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0);
+                jumpParticles.minSize = 0.1;
+                jumpParticles.maxSize = 0.5
+                jumpParticles.minLifeTime = 0.3;
+                jumpParticles.maxLifeTime = 1.2;
+                jumpParticles.direction1 = new BABYLON.Vector3(0, 0, 4);
+                jumpParticles.direction2 = new BABYLON.Vector3(0, 0, 4);
+
+                jumpParticles.start();
+            }
+
 
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
@@ -403,8 +419,7 @@
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y + 1));
                             jumpedTile.id = "e";
 
-                            jumpParticles.emitter = jumpedTile;
-                            jumpParticles.start();
+                            playJumpParticles(jumpedTile);
                             scene.getMeshByName(name).dispose();
 
                             return true;
@@ -412,8 +427,7 @@
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y + 1));
                             jumpedTile.id = "e";
 
-                            jumpParticles.emitter = jumpedTile;
-                            jumpParticles.start();
+                            playJumpParticles(jumpedTile);
                             scene.getMeshByName(name2).dispose();
 
                             return true;
@@ -432,17 +446,15 @@
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y - 1));
                             jumpedTile.id = "e";
 
-                            jumpParticles.emitter = jumpedTile;
-                            jumpParticles.start();
-
+                            playJumpParticles(jumpedTile);
                             scene.getMeshByName(name).dispose();
+                            
                             return true;
                         } else if (scene.getMeshByName(name2) != null) {
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y - 1));
                             jumpedTile.id = "e";
 
-                            jumpParticles.emitter = jumpedTile;
-                            jumpParticles.start();
+                            playJumpParticles(jumpedTile);
                             scene.getMeshByName(name2).dispose();
 
                             return true;
