@@ -481,7 +481,9 @@
                 var name;
                 var jumpedTile;
 
+                // If player 1's turn
                 if (turn) {
+                    // If jumping up and right
                     if ((piece.position.x + 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
                         name = "2_" + (piece.position.x + 1) + (piece.position.y + 1);
                         if (scene.getMeshByName(name) != null) {
@@ -490,6 +492,7 @@
                             jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
                         }
+                        // If jumping up and left
                     } else if ((piece.position.x - 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
                         name = "2_" + (piece.position.x - 1) + (piece.position.y + 1);
                         if (scene.getMeshByName(name) != null) {
@@ -499,8 +502,11 @@
                             return true;
                         }
                     }
-                } else {
-
+                }
+                
+                // If player two's turn
+                else {
+                    // If jumping down and right
                     if ((piece.position.x + 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
                         name = "1_" + (piece.position.x + 1) + (piece.position.y - 1);
                         if (scene.getMeshByName(name) != null) {
@@ -509,7 +515,9 @@
                             jumpPiece(scene.getMeshByName(name), turn, jumpedTile);
                             return true;
                         }
-                    } else if ((piece.position.x - 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
+                    }
+                    // If jumping down and left
+                    else if ((piece.position.x - 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
                         name = "1_" + (piece.position.x - 1) + (piece.position.y - 1);
                         if (scene.getMeshByName(name) != null) {
 
