@@ -237,13 +237,20 @@
                 autoplay: false
             });
 
-            // // Import table from Blender file
-            // function importPicnicTable() {
-            //     var picnicTable = BABYLON.SceneLoader.ImportMesh("Wooden Table", "models/", "table.glb", scene, function (meshes) {
-            //         scene.createDefaultCameraOrLight(false,false,false);
-            //     });
-            // }
-            // importPicnicTable();
+            // Import table from Blender file
+            function importPicnicTable() {
+                var picnicTable
+                BABYLON.SceneLoader.ImportMesh("", "models/", "table.glb", scene, function (newMeshes) {
+                    // Set the target of the camera to the first imported mesh
+                    picnicTable = newMeshes[0];
+                    picnicTable.rotation = new BABYLON.Vector3(1.5708, 0, 0);
+                    picnicTable.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
+                    picnicTable.position.z = -0.2;
+                    picnicTable.position.x = 3.5;
+                    picnicTable.position.y = 3.5
+                });
+            }
+            importPicnicTable();
 
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, height, width, depth) {
@@ -293,7 +300,6 @@
                 table.receiveShadows = true;
 
             }
-
 
             // Creates border around checkerboard
             function createBorder(positionX, positionY, material, height, width) {
@@ -570,7 +576,7 @@
             function initalizeGame() {
                 createBoard(8);
                 populateBoard(pOneMaterial, pTwoMaterial);
-                setupSkybox();
+                // setupSkybox();
                 turn = true;
                 lastSelection = null;
             }
