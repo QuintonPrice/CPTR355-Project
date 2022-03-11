@@ -459,19 +459,31 @@
                 return (piece.id === "k");
             }
 
+            // Makes piece a king
+            function makeKing(piece) {
+                piece.id = "k";
+            }
+
             // Checks to make sure tile is available
             function isNeighboringTile(piece, tile, turn) {
-                if (turn) {
-                    return (
-                        ((piece.position.x + 1 === tile.position.x) || (piece.position.x - 1 === tile.position.x))
-                        && (piece.position.y + 1 === tile.position.y)
-                        && tile.material.name && tile.id === "e");
+                if (!isKing(piece)) {
+                    if (turn) {
+                        return (
+                            ((piece.position.x + 1 === tile.position.x) || (piece.position.x - 1 === tile.position.x))
+                            && (piece.position.y + 1 === tile.position.y)
+                            && tile.id === "e");
 
-                } else {
+                    } else {
+                        return (
+                            ((piece.position.x + 1 === tile.position.x) || (piece.position.x - 1 === tile.position.x))
+                            && (piece.position.y - 1 === tile.position.y)
+                            && tile.id === "e");
+                    }
+                } else if (isKing(piece)) {
                     return (
-                        ((piece.position.x + 1 === tile.position.x) || (piece.position.x - 1 === tile.position.x))
-                        && (piece.position.y - 1 === tile.position.y)
-                        && tile.material.name && tile.id === "e");
+                        ((piece.position.x + 1 === tile.position.x) || (piece.position.x - 1 === tile.position.x)) &&
+                        ((piece.position.y + 1 === tile.position.y) || piece.position.y - 1 === tile.position.y) &&
+                        tile.id === "e");
                 }
             }
 
@@ -488,12 +500,19 @@
             function isJumpable(piece, tile, turn) {
                 var name;
                 var jumpedTile;
+                var oppositeNumber;
+
+                if (turn) {
+                    oppositeNumber = "2_";
+                } else {
+                    oppositeNumber = "1_";
+                }
 
                 // If player 1's turn
                 if (turn) {
                     // If jumping up and right
                     if ((piece.position.x + 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
-                        name = "2_" + (piece.position.x + 1) + (piece.position.y + 1);
+                        name = oppositeNumber + (piece.position.x + 1) + (piece.position.y + 1);
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y + 1));
@@ -502,7 +521,7 @@
                         }
                         // If jumping up and left
                     } else if ((piece.position.x - 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
-                        name = "2_" + (piece.position.x - 1) + (piece.position.y + 1);
+                        name = oppositeNumber + (piece.position.x - 1) + (piece.position.y + 1);
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y + 1));
@@ -516,7 +535,7 @@
                 else {
                     // If jumping down and right
                     if ((piece.position.x + 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
-                        name = "1_" + (piece.position.x + 1) + (piece.position.y - 1);
+                        name = oppositeNumber + (piece.position.x + 1) + (piece.position.y - 1);
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y - 1));
@@ -526,7 +545,7 @@
                     }
                     // If jumping down and left
                     else if ((piece.position.x - 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
-                        name = "1_" + (piece.position.x - 1) + (piece.position.y - 1);
+                        name = oppositeNumber + (piece.position.x - 1) + (piece.position.y - 1);
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y - 1));
