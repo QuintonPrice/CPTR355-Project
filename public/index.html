@@ -63,6 +63,9 @@
             var pOnePieces = 0;
             var pTwoPieces = 0;
 
+            // Notepad for keeping score
+            var notepad;
+            
             // Camera
             var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
             camera.setPosition(new BABYLON.Vector3(4, 4, 25));
@@ -134,7 +137,6 @@
 
             // GUI
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-
             var guiWidthLeft = "150px";
             var guiWidthRight = "200px";
 
@@ -278,6 +280,11 @@
                 autoplay: true
             });
 
+            //Create dynamic texture
+            var textureResolution = 512;
+            var textureGround = new BABYLON.DynamicTexture("dynamic texture", { width: 512, height: 256 }, scene);
+            var textureContext = textureGround.getContext();
+
             // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
             whiteMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#FFFFFF");
@@ -336,6 +343,16 @@
                     picnicTable.receiveShadows = true;
                     // shadowGenerator.addShadowCaster(picnicTable);
                 });
+            }
+
+            // Create notepad for keeping score
+            function createNotepad() {
+                notepad = BABYLON.MeshBuilder.CreateBox("notepad", { height: 1, 5: width, depth: 0.35 });
+                
+            }
+
+            function updateNotepad() {
+
             }
 
             // Create an individual tile for the checkerboard
@@ -448,6 +465,7 @@
                     yVal -= 1;
                 }
             }
+
 
             // Checks if piece is checker
             function isPeon(piece) {
