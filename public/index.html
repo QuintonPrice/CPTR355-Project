@@ -484,8 +484,8 @@
             // Makes piece a king
             function makeKing(piece) {
                 piece.id = "k";
-                piece.scaling.y = 2;
-                console.log("Made" + piece.name + " king!");
+                piece.scaling.y = 2.5;
+                console.log("Made " + piece.name + " king!");
             }
 
             // Checks to make sure tile is available
@@ -532,8 +532,8 @@
                     oppositeNumber = "1_";
                 }
 
-                // If player 1's turn
-                if (turn) {
+                if (isKing(piece)) {
+
                     // If jumping up and right
                     if ((piece.position.x + 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
                         name = oppositeNumber + (piece.position.x + 1) + (piece.position.y + 1);
@@ -552,13 +552,9 @@
                             removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
                             return true;
                         }
-                    }
-                }
 
-                // If player two's turn
-                else {
-                    // If jumping down and right
-                    if ((piece.position.x + 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
+                        // If jumping down and right
+                    } else if ((piece.position.x + 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
                         name = oppositeNumber + (piece.position.x + 1) + (piece.position.y - 1);
                         if (scene.getMeshByName(name) != null) {
 
@@ -566,9 +562,8 @@
                             removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
                             return true;
                         }
-                    }
-                    // If jumping down and left
-                    else if ((piece.position.x - 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
+                        // If jumping down and left
+                    } else if ((piece.position.x - 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
                         name = oppositeNumber + (piece.position.x - 1) + (piece.position.y - 1);
                         if (scene.getMeshByName(name) != null) {
 
@@ -577,15 +572,65 @@
                             return true;
                         }
                     }
+
+                } else {
+
+                    // If player 1's turn
+                    if (turn) {
+                        // If jumping up and right
+                        if ((piece.position.x + 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
+                            name = oppositeNumber + (piece.position.x + 1) + (piece.position.y + 1);
+                            if (scene.getMeshByName(name) != null) {
+
+                                jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y + 1));
+                                removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
+                                return true;
+                            }
+                            // If jumping up and left
+                        } else if ((piece.position.x - 2 === tile.position.x) && piece.position.y + 2 === tile.position.y) {
+                            name = oppositeNumber + (piece.position.x - 1) + (piece.position.y + 1);
+                            if (scene.getMeshByName(name) != null) {
+
+                                jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y + 1));
+                                removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
+                                return true;
+                            }
+                        }
+                    }
+
+                    // If player 2's turn
+                    else {
+                        // If jumping down and right
+                        if ((piece.position.x + 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
+                            name = oppositeNumber + (piece.position.x + 1) + (piece.position.y - 1);
+                            if (scene.getMeshByName(name) != null) {
+
+                                jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y - 1));
+                                removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
+                                return true;
+                            }
+                        }
+                        // If jumping down and left
+                        else if ((piece.position.x - 2 === tile.position.x) && piece.position.y - 2 === tile.position.y) {
+                            name = oppositeNumber + (piece.position.x - 1) + (piece.position.y - 1);
+                            if (scene.getMeshByName(name) != null) {
+
+                                jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y - 1));
+                                removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
+                                return true;
+                            }
+                        }
+                    }
                 }
+
             }
 
             // This determines if a move is valid
             function isValidMove(piece, tile) {
                 if (turn) {
-                    return (isPeon(piece) && piece.name[0] === "1" && (isNeighboringTile(piece, tile) || isJumpable(piece, tile)));
+                    return ((isPeon(piece) || isKing(piece)) && piece.name[0] === "1" && (isNeighboringTile(piece, tile) || isJumpable(piece, tile)));
                 } else if (!turn) {
-                    return (isPeon(piece) && piece.name[0] === "2" && (isNeighboringTile(piece, tile) || isJumpable(piece, tile)));
+                    return ((isPeon(piece) || isKing(piece)) && piece.name[0] === "2" && (isNeighboringTile(piece, tile) || isJumpable(piece, tile)));
                 }
             }
 
@@ -656,7 +701,6 @@
                         if (tile.position.y === 7) {
                             makeKing(piece);
                         }
-
                         turnText1.text = "Player 2's turn"
                     }
                 }
@@ -692,7 +736,7 @@
                     } else {
                         lastSelection = pickResult.pickedMesh;
 
-                        if (isPeon(lastSelection)) {
+                        if (isPeon(lastSelection) || isKing(lastSelection)) {
                             highlight.addMesh(lastSelection, BABYLON.Color3.Yellow());
                         }
                     }
