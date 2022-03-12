@@ -704,6 +704,17 @@
                         turnText1.text = "Player 2's turn"
                     }
                 }
+                checkGameWinner();
+            }
+
+            function checkGameWinner() {
+                if (pOnePieces === 0) {
+                    alert("Player two wins!");
+                    resetGame();
+                } else if (pTwoPieces === 0) {
+                    alert("Player one wins!");
+                    resetGame();
+                }
             }
 
             // Used to "store" the piece that is selected
@@ -722,10 +733,7 @@
 
                     if (lastSelection) {
                         if (isValidMove(lastSelection, pickResult.pickedMesh)) {
-                            do {
-                                movePiece(lastSelection, pickResult.pickedMesh);
-                            }
-                            while (isJumpable(lastSelection, pickResult.pickedMesh));
+                            movePiece(lastSelection, pickResult.pickedMesh);
                             turn = !turn;
                         }
 
