@@ -65,7 +65,7 @@
 
             // Notepad for keeping score
             var notepad;
-            
+
             // Camera
             var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
             camera.setPosition(new BABYLON.Vector3(4, 4, 25));
@@ -280,11 +280,6 @@
                 autoplay: true
             });
 
-            //Create dynamic texture
-            var textureResolution = 512;
-            var textureGround = new BABYLON.DynamicTexture("dynamic texture", { width: 512, height: 256 }, scene);
-            var textureContext = textureGround.getContext();
-
             // Materials
             const whiteMaterial = new BABYLON.StandardMaterial("White");
             whiteMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#FFFFFF");
@@ -314,10 +309,6 @@
                 var picnicTable
                 BABYLON.SceneLoader.ImportMesh("", "models/", "picnicTable.glb", scene, function (newMeshes) {
 
-                    // for (let i = 0; i < 7; i++) {
-                    //     newMeshes[i].receiveShadows = true;
-                    //     console.log(newMeshes[i]);
-                    // }
                     var book = newMeshes[4];
 
                     // add actionManager on book
@@ -347,13 +338,26 @@
 
             // Create notepad for keeping score
             function createNotepad() {
-                notepad = BABYLON.MeshBuilder.CreateBox("notepad", { height: 1, 5: width, depth: 0.35 });
-                
-            }
+                notepad = BABYLON.MeshBuilder.CreateBox("notepad", { height: 4.5, width: 3, depth: 0.05 });
+                notepad.position.x = -5;
+                notepad.position.y = 3;
+                notepad.position.z = -0.15;
+                notepad.rotation = new BABYLON.Vector3(1.5708, 0, 0);
 
-            function updateNotepad() {
+                // Dynamic texture for notepad
+                var notepadTexture = new BABYLON.DynamicTexture("dynamic texture", { width: 512, height: 256 }, scene);
 
+                var notepadMaterial = new BABYLON.StandardMaterial("Mat", scene);
+                notepadMaterial.diffuseTexture = notepadTexture;
+                notepad.material = notepadMaterial;
+
+                //Add text to dynamic texture
+                var font = "bold 44px monospace";
+                notepadTexture.drawText("Grass", 75, 135, font, "green", "white", true, true);
             }
+            // createNotepad();
+
+            // function updateNotepad() {}
 
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, height, width, depth) {
@@ -480,10 +484,12 @@
             // Makes piece a king
             function makeKing(piece) {
                 piece.id = "k";
+                piece.scaling.y = 2;
+                console.log("Made" + piece.name + " king!");
             }
 
             // Checks to make sure tile is available
-            function isNeighboringTile(piece, tile, turn) {
+            function isNeighboringTile(piece, tile) {
                 if (!isKing(piece)) {
                     if (turn) {
                         return (
@@ -506,16 +512,16 @@
             }
 
             // Plays particles andr removes jumped piece
-            function removeJumpedPiece(piece, turn, jumpedTile) {
+            function removeJumpedPiece(piece, jumpedTile) {
 
                 jumpedTile.id = "e";
                 playJumpParticles(jumpedTile);
-                removePiece(piece, turn);
+                removePiece(piece);
             }
 
             // Tells if piece is jumpable
             // If so, removes jumped piece, adds particles
-            function isJumpable(piece, tile, turn) {
+            function isJumpable(piece, tile) {
                 var name;
                 var jumpedTile;
                 var oppositeNumber;
@@ -534,7 +540,7 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y + 1));
-                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
                             return true;
                         }
                         // If jumping up and left
@@ -543,7 +549,7 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y + 1));
-                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
                             return true;
                         }
                     }
@@ -557,7 +563,7 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x + 1) + (piece.position.y - 1));
-                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
                             return true;
                         }
                     }
@@ -567,7 +573,7 @@
                         if (scene.getMeshByName(name) != null) {
 
                             jumpedTile = scene.getMeshByName("t" + (piece.position.x - 1) + (piece.position.y - 1));
-                            removeJumpedPiece(scene.getMeshByName(name), turn, jumpedTile);
+                            removeJumpedPiece(scene.getMeshByName(name), jumpedTile);
                             return true;
                         }
                     }
@@ -575,16 +581,16 @@
             }
 
             // This determines if a move is valid
-            function isValidMove(piece, tile, turn) {
+            function isValidMove(piece, tile) {
                 if (turn) {
-                    return (isPeon(piece) && piece.name[0] === "1" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
+                    return (isPeon(piece) && piece.name[0] === "1" && (isNeighboringTile(piece, tile) || isJumpable(piece, tile)));
                 } else if (!turn) {
-                    return (isPeon(piece) && piece.name[0] === "2" && (isNeighboringTile(piece, tile, turn) || isJumpable(piece, tile, turn)));
+                    return (isPeon(piece) && piece.name[0] === "2" && (isNeighboringTile(piece, tile) || isJumpable(piece, tile)));
                 }
             }
 
             // Removes a piece
-            function removePiece(piece, turn) {
+            function removePiece(piece) {
                 piece.dispose();
                 if (turn) {
                     pTwoPieces -= 1;
@@ -642,8 +648,15 @@
                     highlight.removeMesh(piece);
                     piece.name = piece.name[0] + "_" + tile.position.x + tile.position.y;
                     if (turn) {
+                        if (tile.position.y === 0) {
+                            makeKing(piece);
+                        }
                         turnText1.text = "Player 1's turn";
                     } else {
+                        if (tile.position.y === 7) {
+                            makeKing(piece);
+                        }
+
                         turnText1.text = "Player 2's turn"
                     }
                 }
@@ -664,11 +677,11 @@
                     console.log(pickResult.pickedMesh);
 
                     if (lastSelection) {
-                        if (isValidMove(lastSelection, pickResult.pickedMesh, turn)) {
+                        if (isValidMove(lastSelection, pickResult.pickedMesh)) {
                             do {
-                                movePiece(lastSelection, pickResult.pickedMesh, turn);
+                                movePiece(lastSelection, pickResult.pickedMesh);
                             }
-                            while (isJumpable(lastSelection, pickResult.pickedMesh, turn));
+                            while (isJumpable(lastSelection, pickResult.pickedMesh));
                             turn = !turn;
                         }
 
@@ -695,6 +708,8 @@
                     scene.meshes[i].dispose();
                     i--;
                 }
+                pOnePieces = 0;
+                pTwoPieces = 0;
                 initalizeGame();
             }
 
