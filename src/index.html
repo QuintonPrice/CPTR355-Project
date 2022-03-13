@@ -87,7 +87,7 @@
             function setupSkybox() {
                 var skybox = new BABYLON.PhotoDome(
                     "testdome",
-                    "./img/sky3.jpeg",
+                    "../public/img/sky3.jpeg",
                     {
                         resolution: 32,
                         size: 500,
@@ -101,7 +101,7 @@
                 const jumpParticles = new BABYLON.ParticleSystem("particles", 1000);
                 jumpParticles.emitter = emitter;
 
-                jumpParticles.particleTexture = new BABYLON.Texture("img/flare.png");
+                jumpParticles.particleTexture = new BABYLON.Texture("../public/img/flare.png");
                 jumpParticles.emitRate = 20;
                 jumpParticles.manualEmitCount = 100;
                 jumpParticles.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
@@ -267,14 +267,14 @@
             leftPanel.addControl(volumeSlider);
 
             // Sound for moving checkers
-            var moveSound = new BABYLON.Sound("moveSound", "sound/moving_effect.wav", scene, null, {
+            var moveSound = new BABYLON.Sound("moveSound", "../public/sound/moving_effect.wav", scene, null, {
                 loop: false,
                 volume: 1,
                 autoplay: false
             });
 
             // Background music
-            var jazzMusic = new BABYLON.Sound("Music", "sound/jazz_music.mp3", scene, null, {
+            var jazzMusic = new BABYLON.Sound("Music", "../public/sound/jazz_music.mp3", scene, null, {
                 loop: true,
                 volume: volumeSlider.value,
                 autoplay: true
@@ -288,16 +288,16 @@
             blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
             const pOneMaterial = new BABYLON.StandardMaterial("pOneMaterial");
-            pOneMaterial.diffuseTexture = new BABYLON.Texture("img/LightWood.jpg");
-            pOneMaterial.specularTexture = new BABYLON.Texture("img/LightWood.jpg");
-            pOneMaterial.emissiveTexture = new BABYLON.Texture("img/LightWood.jpg");
-            pOneMaterial.ambientTexture = new BABYLON.Texture("img/LightWood.jpg");
+            pOneMaterial.diffuseTexture = new BABYLON.Texture("../public/img/LightWood.jpg");
+            pOneMaterial.specularTexture = new BABYLON.Texture("../public/img/LightWood.jpg");
+            pOneMaterial.emissiveTexture = new BABYLON.Texture("../public/img/LightWood.jpg");
+            pOneMaterial.ambientTexture = new BABYLON.Texture("../public/img/LightWood.jpg");
 
             const pTwoMaterial = new BABYLON.StandardMaterial("pTwoMaterial");
-            pTwoMaterial.diffuseTexture = new BABYLON.Texture("img/RedTexture.jpg");
-            pTwoMaterial.specularTexture = new BABYLON.Texture("img/RedTexture.jpg");
-            pTwoMaterial.emissiveTexture = new BABYLON.Texture("img/RedTexture.jpg");
-            pTwoMaterial.ambientTexture = new BABYLON.Texture("img/RedTexture.jpg");
+            pTwoMaterial.diffuseTexture = new BABYLON.Texture("../public/img/RedTexture.jpg");
+            pTwoMaterial.specularTexture = new BABYLON.Texture("../public/img/RedTexture.jpg");
+            pTwoMaterial.emissiveTexture = new BABYLON.Texture("../public/img/RedTexture.jpg");
+            pTwoMaterial.ambientTexture = new BABYLON.Texture("../public/img/RedTexture.jpg");
 
             // Highlight variables for picking pieces
             var highlight = new BABYLON.HighlightLayer("highlight", scene);
@@ -307,7 +307,7 @@
             // Import table from Blender file
             function importPicnicScene() {
                 var picnicTable
-                BABYLON.SceneLoader.ImportMesh("", "models/", "picnicTable.glb", scene, function (newMeshes) {
+                BABYLON.SceneLoader.ImportMesh("", "../public/models/", "picnicTable.glb", scene, function (newMeshes) {
 
                     var book = newMeshes[4];
 
