@@ -66,12 +66,11 @@
             // Notepad for keeping score
             var notepad;
 
-            // Camera
-            var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
-            camera.setPosition(new BABYLON.Vector3(4, 4, 25));
-            camera.attachControl(canvas, true);
-            camera.allowUpsideDown = true;
-            camera.invertRotation = false;
+            // Meshes for player cameras
+            var camBox1, camBox2;
+
+            // Cameras
+            var camera, pOneCamera;
 
             // Setup lights
             const hemiLight = new BABYLON.HemisphericLight("hemiLght", new BABYLON.Vector3(1, 1, 0));
@@ -193,7 +192,7 @@
             infoText.height = "100px";
             infoText.color = "white";
             infoText.fontSize = 24;
-            rightPanel.addControl(infoText);
+            // rightPanel.addControl(infoText);
 
             // Light toggle button
             var toggleLightButton = BABYLON.GUI.Button.CreateSimpleButton("toggleLight", "Toggle Lamp");
@@ -213,7 +212,7 @@
 
             // Mute button
             var muteSound = false;
-            var muteButton = BABYLON.GUI.Button.CreateSimpleButton("mute", "Mute/Unmute Game Sound");
+            var muteButton = BABYLON.GUI.Button.CreateSimpleButton("mute", "Mute/Unmute Moving Sound");
             muteButton.width = guiWidthLeft;
             muteButton.height = "45px";
             muteButton.color = "white";
@@ -240,7 +239,6 @@
                 resetGame();
             });
             leftPanel.addControl(resetGameButton);
-
 
             var volumeSliderText = BABYLON.GUI.Button.CreateSimpleButton("resetGame", "Music Volume:");
             volumeSliderText.width = guiWidthLeft;
@@ -304,6 +302,23 @@
             highlight.blurHorizontalSize = 0.3 + Math.cos(0) * 0.6 + 0.6;
             highlight.blurVerticalSize = 0.3 + Math.sin(0 / 3) * 0.6 + 0.6;
 
+            function setupCameras() {
+                camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 0, new BABYLON.Vector3(4, 4, 0), scene);
+                camera.setPosition(new BABYLON.Vector3(4, 4, 25));
+                camera.attachControl(canvas, true);
+                camera.allowUpsideDown = true;
+
+                // pOneCamera = new BABYLON.FollowCamera("pOneCamera", new BABYLON.Vector3(0, 50, 50), scene);
+                // pOneCamera.radius = 10;
+                // pOneCamera.attachControl(canvas, true);
+
+                // camBox1 = BABYLON.MeshBuilder.CreateBox("box1", { height: 0.00001, width: 0.00001, depth: 0.00001});
+                // camBox1.position = new BABYLON.Vector3(3.5, 0, 0.2);
+                // pOneCamera.lockedTarget = camBox1;
+
+                scene.activeCamera = camera;
+            }
+
             // Import table from Blender file
             function importPicnicScene() {
                 var picnicTable
@@ -335,29 +350,6 @@
                     // shadowGenerator.addShadowCaster(picnicTable);
                 });
             }
-
-            // Create notepad for keeping score
-            function createNotepad() {
-                notepad = BABYLON.MeshBuilder.CreateBox("notepad", { height: 4.5, width: 3, depth: 0.05 });
-                notepad.position.x = -5;
-                notepad.position.y = 3;
-                notepad.position.z = -0.15;
-                notepad.rotation = new BABYLON.Vector3(1.5708, 0, 0);
-
-                // Dynamic texture for notepad
-                var notepadTexture = new BABYLON.DynamicTexture("dynamic texture", { width: 512, height: 256 }, scene);
-
-                var notepadMaterial = new BABYLON.StandardMaterial("Mat", scene);
-                notepadMaterial.diffuseTexture = notepadTexture;
-                notepad.material = notepadMaterial;
-
-                //Add text to dynamic texture
-                var font = "bold 44px monospace";
-                notepadTexture.drawText("Grass", 75, 135, font, "green", "white", true, true);
-            }
-            // createNotepad();
-
-            // function updateNotepad() {}
 
             // Create an individual tile for the checkerboard
             function createBox(positionX, positionY, material, height, width, depth) {
@@ -728,7 +720,7 @@
             scene.onPointerDown = function (evt, pickResult) {
 
                 if (pickResult.hit) {
-                    infoText.text = pickResult.pickedMesh.name + " \n" + pickResult.pickedMesh.id;
+                    // infoText.text = pickResult.pickedMesh.name + " \n" + pickResult.pickedMesh.id;
                     console.log(pickResult.pickedMesh);
 
                     if (lastSelection) {
@@ -770,6 +762,7 @@
                 createBoard(8);
                 populateBoard(pOneMaterial, pTwoMaterial);
                 importPicnicScene();
+                setupCameras();
 
                 setupSkybox();
                 turn = true;
