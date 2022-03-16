@@ -120,10 +120,11 @@
             // Antialiasing
             var pipeline = new BABYLON.DefaultRenderingPipeline(
                 "defaultPipeline", // The name of the pipeline
-                false, // Do you want the pipeline to use HDR texture?
+                true, // Do you want the pipeline to use HDR texture?
                 scene, // The scene instance
             );
 
+            // Antialiasing samples
             pipeline.samples = 32;
 
             // Shadows
@@ -307,6 +308,7 @@
                 camera.setPosition(new BABYLON.Vector3(4, 4, 25));
                 camera.attachControl(canvas, true);
                 camera.allowUpsideDown = true;
+                camera.invertRotation = false;
 
                 // pOneCamera = new BABYLON.FollowCamera("pOneCamera", new BABYLON.Vector3(0, 50, 50), scene);
                 // pOneCamera.radius = 10;
@@ -316,7 +318,7 @@
                 // camBox1.position = new BABYLON.Vector3(3.5, 0, 0.2);
                 // pOneCamera.lockedTarget = camBox1;
 
-                scene.activeCamera = camera;
+                // scene.activeCamera = camera;
             }
 
             // Import table from Blender file
